@@ -226,33 +226,20 @@ html, body {
     function lerp(a, b, t) {
       return a + (b - a) * t;
     }
-function drawTextWithEffects(p, x, y) {
-  ctx.textBaseline = 'middle';
-  ctx.textAlign = 'center';
 
-  // Тень и свет — имитация объёма
-  // Рисуем тёмный "тень" с небольшим смещением вниз и вправо
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-  ctx.fillText(p.char, x + 2, y + 2);
-
-  // Рисуем светлый верхний "блик" с небольшим смещением вверх и влево
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.fillText(p.char, x - 2, y - 2);
-
-  // Основной текст с золотой обводкой и свечением
+   function drawTextWithEffects(p, x, y) {
+  // Светящееся золотое свечение
   ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
   ctx.shadowBlur = 12;
-
+  
+  // Золотая обводка
   ctx.lineWidth = 2;
   ctx.strokeStyle = '#FFD700';
   ctx.strokeText(p.char, x, y);
 
+  // Чёрное заполнение
   ctx.fillStyle = '#000000';
   ctx.fillText(p.char, x, y);
-
-  ctx.shadowBlur = 0;
-}
-
 }
 
     function animate() {
