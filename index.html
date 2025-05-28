@@ -21,10 +21,18 @@ html, body {
   color: #050505;
 }
 
-/* Адаптивный canvas */
-canvas {
+/* Контейнер для анимации - занимает весь экран */
+#animation-container {
+  position: relative;
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
+}
+
+/* canvas внутри контейнера занимает весь контейнер */
+#animation-container canvas {
+  width: 100%;
+  height: 100%;
   display: block;
 }
 
@@ -87,12 +95,14 @@ canvas {
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+  <div id="animation-container">
+    <canvas id="canvas"></canvas>
 
-  <div id="icons">
-    <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
-    <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="HTML5" />
-    <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
+    <div id="icons">
+      <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
+      <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="HTML5" />
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
+    </div>
   </div>
 
   <script>
