@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Анимация сборки из частиц</title>
+<title>Анимация частиц с полётом по экрану</title>
 <style>
   * {
     margin: 0; padding: 0; box-sizing: border-box;
@@ -55,8 +55,9 @@
 
   const particleSize = 20;
   const particles = [];
-  let animationPhase = 'explode'; // explode -> orbit -> assemble -> done
+  let animationPhase = 'explode'; // explode -> fly -> assemble -> done
   let frame = 0;
+
   const centerX = W / 2;
   const centerY = H / 2;
 
@@ -83,22 +84,19 @@
     particles.length = 0;
     for(let i=0; i<assembledPositions.length; i++) {
       const pos = assembledPositions[i];
+      // Стартовая позиция - центр
+      // Начальная скорость для взрыва
       const angle = Math.random() * Math.PI * 2;
-      const speed = 0.02 + Math.random()*0.03;
-      const orbitRadius = 50 + Math.random()*150;
+      const speed = 4 + Math.random()*3;
       particles.push({
         x: centerX,
         y: centerY,
         char: pos.char,
-        angle: angle,
-        speed: speed,
-        orbitRadius: orbitRadius,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed,
         targetX: pos.x,
         targetY: pos.y,
-        phase: 'explode',
-        vx: (Math.random()-0.5)*15,
-        vy: (Math.random()-0.5)*15,
-        opacity: 1
+        phase: 'explode'
       });
     }
   }
@@ -121,51 +119,66 @@
 
     for(let p of particles) {
       if(p.phase === 'explode') {
+        // Взрыв — частицы улетают из центра
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.92;
-        p.vy *= 0.92;
+        // Немного трения
+        p.vx *= 0.95;
+        p.vy *= 0.95;
 
+        // Когда скорость станет маленькой — переход к полёту
         if(Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
-          p.phase = 'orbit';
-          p.angle = Math.atan2(p.y - centerY, p.x - centerX);
-          p.orbitRadius = Math.hypot(p.x - centerX, p.y - centerY);
+          p.phase = 'fly';
+          // Задаём новую случайную скорость для свободного полёта
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 1 + Math.random()*2;
+          p.vx = Math.cos(angle)*speed;
+          p.vy = Math.sin(angle)*speed;
         }
-      } else if(p.phase === 'orbit') {
-        p.angle += p.speed;
-        p.x = centerX + Math.cos(p.angle) * p.orbitRadius;
-        p.y = centerY + Math.sin(p.angle) * p.orbitRadius;
+      } else if(p.phase === 'fly') {
+        // Свободный полёт по экрану
+        p.x += p.vx;
+        p.y += p.vy;
 
-        if(frame > 300) {
+        // Отражение от краёв
+        if(p.x < 0 || p.x > W) p.vx = -p.vx;
+        if(p.y < 0 || p.y > H) p.vy = -p.vy;
+
+        // Плавное изменение направления (случайный поворот)
+        if(Math.random() < 0.02) {
+          const angle = Math.atan2(p.vy, p.vx) + (Math.random()-0.5);
+          const speed = Math.hypot(p.vx, p.vy);
+          p.vx = Math.cos(angle)*speed;
+          p.vy = Math.sin(angle)*speed;
+        }
+
+        // Через 6 секунд (примерно 360 кадров) начинаем сборку
+        if(frame > 360) {
           p.phase = 'assemble';
         }
       } else if(p.phase === 'assemble') {
+        // Сборка — плавно движемся к целевой точке
         p.x = lerp(p.x, p.targetX, 0.12);
         p.y = lerp(p.y, p.targetY, 0.12);
 
-        if(Math.abs(p.x - p.targetX) < 1 && Math.abs(p.y - p.targetY) < 1) {
-          p.x = p.targetX;
-          p.y = p.targetY;
-        } else {
+        if(Math.abs(p.x - p.targetX) > 1 || Math.abs(p.y - p.targetY) > 1) {
           allAssembled = false;
         }
       }
 
-      // тень для объёма и плавный эффект
+      // Тень и стиль текста
       ctx.shadowColor = 'rgba(0,0,0,0.15)';
       ctx.shadowBlur = 3;
       ctx.fillStyle = '#222';
 
-      ctx.globalAlpha = p.opacity;
       ctx.fillText(p.char, p.x, p.y);
-      ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
     }
 
     if(animationPhase === 'explode' && frame > 60) {
-      animationPhase = 'orbit';
+      animationPhase = 'fly';
       frame = 0;
-    } else if(animationPhase === 'orbit' && frame > 300) {
+    } else if(animationPhase === 'fly' && frame > 360) {
       animationPhase = 'assemble';
       frame = 0;
     } else if(animationPhase === 'assemble' && allAssembled) {
@@ -175,7 +188,7 @@
     if(animationPhase !== 'done') {
       requestAnimationFrame(animate);
     } else {
-      // финальный рендер — буквы статичные с легкой тенью
+      // Финальный статичный текст
       ctx.clearRect(0, 0, W, H);
       ctx.shadowColor = 'rgba(0,0,0,0.2)';
       ctx.shadowBlur = 4;
