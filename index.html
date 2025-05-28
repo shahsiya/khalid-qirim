@@ -5,95 +5,97 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Qirim Yurtu</title>
   <style>
-    /* Обнуляем стили и устанавливаем box-sizing */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+   /* Обнуляем стили и устанавливаем box-sizing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow-x: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #ffffff;
-      color: #050505;
-    }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #ffffff;
+  color: #050505;
+}
 
-    /* Контейнер с отступами */
-    #container {
-      max-width: 960px; /* например, фиксированная ширина */
-      margin: 0 auto;
-      padding: 0 20px; /* отступы справа и слева */
-      height: 100vh;
-      position: relative;
-    }
+/* Контейнер для анимации - занимает весь экран */
+#animation-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
 
-    /* Адаптивный canvas - на всю ширину контейнера и всю высоту */
-    #canvas {
-     max-width: 960px;
-      height: 100vh;
-      display: block;
-    }
+/* canvas внутри контейнера занимает весь контейнер */
+#animation-container canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
-    /* Блок иконок */
-    #icons {
-      position: absolute;
-      bottom: 20px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      padding: 10px 16px;
-      opacity: 0;
-      transition: opacity 1s ease;
-      z-index: 10;
-      box-sizing: border-box;
-    }
+/* Блок иконок */
+#icons {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 16px;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 10;
+  box-sizing: border-box;
+}
 
-    /* Появление иконок после завершения анимации */
-    #icons.visible {
-      opacity: 1;
-    }
+/* Появление иконок после завершения анимации */
+#icons.visible {
+  opacity: 1;
+}
 
-    /* Иконки */
-    #icons img {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-      transition: transform 0.3s ease;
-      flex-shrink: 0;
-    }
+/* Иконки */
+#icons img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
 
-    #icons img:hover {
-      transform: scale(1.1);
-    }
+#icons img:hover {
+  transform: scale(1.1);
+}
 
-    /* Медиазапросы */
-    @media (max-width: 768px) {
-      #icons img {
-        width: 36px;
-        height: 36px;
-      }
-    }
+/* Медиазапросы */
+@media (max-width: 768px) {
+  #icons img {
+    width: 36px;
+    height: 36px;
+  }
+}
 
-    @media (max-width: 480px) {
-      #icons img {
-        width: 32px;
-        height: 32px;
-      }
-      #icons {
-        gap: 12px;
-      }
-    }
+@media (max-width: 480px) {
+  #icons img {
+    width: 32px;
+    height: 32px;
+  }
+
+  #icons {
+    gap: 12px;
+  }
+}
+
   </style>
 </head>
 <body>
-  <div id="container">
+  <div id="animation-container">
     <canvas id="canvas"></canvas>
 
     <div id="icons">
@@ -106,7 +108,6 @@
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const container = document.getElementById('container');
 
     let W, H;
     let particleSize;
@@ -146,9 +147,8 @@
     }
 
     function setupCanvas() {
-      // размеры равны размерам контейнера
-      W = container.clientWidth;
-      H = container.clientHeight;
+      W = window.innerWidth;
+      H = window.innerHeight;
 
       canvas.width = W * dpr;
       canvas.height = H * dpr;
@@ -165,10 +165,7 @@
       createParticles();
     }
 
-    window.addEventListener('resize', () => {
-      setupCanvas();
-      // Если хочешь сбросить анимацию при ресайзе, можно добавить frame = 0 и animationPhase = 'explode' и createParticles();
-    });
+    window.addEventListener('resize', setupCanvas);
 
     function prepareAssembledPositions() {
       assembledPositions.length = 0;
