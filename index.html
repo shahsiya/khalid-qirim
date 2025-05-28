@@ -138,7 +138,7 @@ html, body {
       ctx.font = `bold ${size}px 'Poppins', sans-serif`;
       let textWidth = ctx.measureText(longestLine).width;
 
-      while (textWidth > availableWidth && size > 10) {
+      while (textWidth > availableWidth && size > 5) {
         size -= 1;
         ctx.font = `bold ${size}px 'Poppins', sans-serif`;
         textWidth = ctx.measureText(longestLine).width;
