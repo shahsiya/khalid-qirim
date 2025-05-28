@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Qirim Yurtu</title>
+  <!-- Подключаем Orbitron -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
   <style>
    /* Обнуляем стили и устанавливаем box-sizing */
 * {
@@ -16,7 +18,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Orbitron', sans-serif;
   background-color: #ffffff;
   color: #050505;
 }
@@ -146,13 +148,13 @@ html, body {
     size = 32; // для десктопа
   }
 
-  ctx.font = `bold ${size}px 'Poppins', sans-serif`;
+  ctx.font = `bold ${size}px 'Orbitron', sans-serif`;
   let textWidth = ctx.measureText(longestLine).width;
 
   // Подгоняем размер под доступную ширину
   while (textWidth > availableWidth && size > 10) {
     size -= 1;
-    ctx.font = `bold ${size}px 'Poppins', sans-serif`;
+    ctx.font = `bold ${size}px 'Orbitron', sans-serif`;
     textWidth = ctx.measureText(longestLine).width;
   }
 
@@ -242,7 +244,7 @@ html, body {
 
     function animate() {
       ctx.clearRect(0, 0, W, H);
-      ctx.font = `bold ${particleSize}px 'Poppins', 'Segoe UI', Tahoma, Geneva, sans-serif`;
+      ctx.font = `bold ${particleSize}px 'Orbitron', sans-serif`;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
 
