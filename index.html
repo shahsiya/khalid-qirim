@@ -2,31 +2,57 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Khalid / Qirim Yurtu</title>
+  <title>Анимационная сборка текста из частиц</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing: border-box; }
     html, body {
       height: 100%;
       background: black;
       overflow: hidden;
       font-family: monospace;
+      color: #0f0;
+    }
+    #countdown {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 6rem;
+      user-select: none;
+      z-index: 10;
+      color: #0f0;
     }
     canvas {
       position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
+      top:0; left:0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: black;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
+
+<div id="countdown">3</div>
 <canvas id="canvas"></canvas>
 
 <script>
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  let W, H;
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const countdownEl = document.getElementById('countdown');
+  let countdown = 3;
 
   const letters = "01@#%QWERTYASDZXCVBNMkırımlı";
   const content = [
@@ -37,89 +63,147 @@
     'Контакты: @shahsiya123 | master_work@outlook.com'
   ];
 
+  // Все частицы
   const particles = [];
+
+  // Параметры
+  const PARTICLE_SIZE = 18;
+  const EXPLOSION_FORCE = 12;
+  const ASSEMBLE_SPEED = 0.12;
+  const FADE_SPEED = 0.02;
+
+  // Состояния анимации
+  let phase = 'countdown'; // countdown -> explode -> assemble -> done
+
+  // Счётчик сколько символов собрано
+  let assembledCount = 0;
   const totalLetters = content.reduce((acc, line) => acc + line.length, 0);
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
 
-  let assembling = false;
-  let assigned = 0;
+  // Центр для взрыва
+  const centerX = W / 2;
+  const centerY = H / 2;
 
+  // Создаём частицы (больше, чем нужно для текста)
   function createParticles() {
-    for (let i = 0; i < totalLetters * 3; i++) {
+    particles.length = 0;
+    const totalParticles = totalLetters + 200; // немного запасных частиц
+    for(let i = 0; i < totalParticles; i++) {
       particles.push({
         x: centerX,
         y: centerY,
-        dx: (Math.random() - 0.5) * 10,
-        dy: (Math.random() - 0.5) * 10,
+        dx: (Math.random() - 0.5) * EXPLOSION_FORCE,
+        dy: (Math.random() - 0.5) * EXPLOSION_FORCE,
         char: letters[Math.floor(Math.random() * letters.length)],
         targetX: null,
         targetY: null,
         targetChar: null,
-        assembling: false,
-        arrived: false
+        opacity: 1,
+        state: 'exploding', // exploding, assembling, done, fading
+        arrived: false,
       });
     }
   }
 
+  // Расставляем цели частицам — для текста
   function assignTargets() {
     let index = 0;
-    const startY = centerY - content.length * 15;
+    const startY = centerY - (content.length * PARTICLE_SIZE) / 2;
 
-    for (let i = 0; i < content.length; i++) {
+    for(let i = 0; i < content.length; i++) {
       const line = content[i];
-      const startX = centerX - line.length * 7;
+      const startX = centerX - (line.length * PARTICLE_SIZE) / 2;
 
-      for (let j = 0; j < line.length; j++) {
-        const char = line[j];
-        if (index >= particles.length) break;
-
-        const p = particles[index];
-        p.targetX = startX + j * 14;
-        p.targetY = startY + i * 30;
-        p.targetChar = char;
-        p.assembling = true;
+      for(let j = 0; j < line.length; j++) {
+        if(index >= particles.length) break;
+        let p = particles[index];
+        p.targetX = startX + j * PARTICLE_SIZE;
+        p.targetY = startY + i * PARTICLE_SIZE;
+        p.targetChar = line[j];
+        p.state = 'assembling';
+        p.arrived = false;
         index++;
       }
     }
+
+    // Остальные частицы — будут исчезать (fading)
+    for(let i = index; i < particles.length; i++) {
+      particles[i].state = 'fading';
+    }
   }
 
+  // Обновляем и рисуем частицы
   function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "20px monospace";
+    ctx.clearRect(0, 0, W, H);
+    ctx.font = `${PARTICLE_SIZE}px monospace`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
 
-    for (let p of particles) {
-      if (!p.assembling) {
+    assembledCount = 0;
+
+    for(let p of particles) {
+      if(p.state === 'exploding') {
         p.x += p.dx;
         p.y += p.dy;
-        p.dx *= 0.98;
-        p.dy *= 0.98;
-      } else if (!p.arrived) {
-        p.x += (p.targetX - p.x) * 0.1;
-        p.y += (p.targetY - p.y) * 0.1;
+        p.dx *= 0.95; // затухание скорости
+        p.dy *= 0.95;
+      } else if(p.state === 'assembling') {
+        // плавное движение к цели
+        p.x += (p.targetX - p.x) * ASSEMBLE_SPEED;
+        p.y += (p.targetY - p.y) * ASSEMBLE_SPEED;
 
-        if (Math.abs(p.x - p.targetX) < 1 && Math.abs(p.y - p.targetY) < 1) {
-          p.arrived = true;
+        // смена символа на целевой при близости
+        if(Math.abs(p.x - p.targetX) < 1 && Math.abs(p.y - p.targetY) < 1) {
+          p.x = p.targetX;
+          p.y = p.targetY;
           p.char = p.targetChar;
-          assigned++;
+          p.arrived = true;
         }
+
+        if(p.arrived) assembledCount++;
+      } else if(p.state === 'fading') {
+        p.opacity -= FADE_SPEED;
+        if(p.opacity < 0) p.opacity = 0;
       }
 
-      ctx.fillStyle = `rgba(0,255,100,0.9)`;
+      // Рисуем
+      ctx.fillStyle = `rgba(0, 255, 0, ${p.opacity || 1})`;
       ctx.fillText(p.char, p.x, p.y);
+    }
+
+    // Когда все частицы для текста на месте, переходим в done
+    if(phase === 'assemble' && assembledCount === totalLetters) {
+      phase = 'done';
+      countdownEl.style.display = 'none';
+      // Через 2 секунды можно делать что-то ещё, например, переход
+      setTimeout(() => {
+        // window.location.href = "main.html"; // раскомментируй для перехода
+      }, 2000);
     }
 
     requestAnimationFrame(animate);
   }
 
-  // Запуск
-  createParticles();
-  setTimeout(() => {
-    assembling = true;
-    assignTargets();
-  }, 2000); // Взрыв 2 сек
+  // Обратный отсчёт
+  function startCountdown() {
+    countdownEl.textContent = countdown;
+    if(countdown === 0) {
+      countdownEl.style.display = 'none';
+      phase = 'explode';
+      createParticles();
+      setTimeout(() => {
+        phase = 'assemble';
+        assignTargets();
+      }, 2000); // 2 секунды летят частицы
+      animate();
+      return;
+    }
+    countdown--;
+    setTimeout(startCountdown, 1000);
+  }
 
-  animate();
+  // Запуск
+  startCountdown();
 </script>
+
 </body>
 </html>
