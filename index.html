@@ -243,3 +243,23 @@
     if(animationPhase !== 'done') {
       if(allAssembled && frame > 300) {
         animationPhase = 'done';
+      }
+      requestAnimationFrame(animate);
+    } else {
+      // Чтобы частицы не стояли совсем неподвижно,
+      // можно добавить легкое пульсирование на месте
+      for(let p of particles) {
+        p.x += Math.sin(frame * 0.01 + p.x)*0.1;
+        p.y += Math.cos(frame * 0.01 + p.y)*0.1;
+      }
+      frame++;
+      requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+</script>
+
+</body>
+</html>
+
