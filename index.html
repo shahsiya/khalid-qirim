@@ -1,204 +1,245 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Анимация частиц с текстом</title>
-  <style>
-    /* чтобы canvas занимал весь экран */
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #000; /* чёрный фон, можно менять */
-      height: 100%;
-      width: 100%;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Плавная анимация частиц с иконками</title>
+<style>
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+  html, body {
+    height: 100%; background: #fff; overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #222;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  canvas {
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #fff;
+    z-index: 1;
+  }
+  #icons {
+    position: fixed;
+    bottom: 40px;
+    display: flex;
+    gap: 40px;
+    z-index: 10;
+    opacity: 0;
+    animation: fadeInIcons 1.5s forwards 2s; /* плавное появление через 2 секунды */
+  }
+  @keyframes fadeInIcons {
+    to { opacity: 1; }
+  }
+  #icons a {
+    text-decoration: none;
+    color: #222;
+    font-size: 0;
+    width: 48px;
+    height: 48px;
+    display: inline-block;
+    filter: invert(0%);
+    transition: filter 0.3s ease;
+    outline-offset: 4px; /* для лучшего фокуса клавиатуры */
+  }
+  #icons a:hover,
+  #icons a:focus {
+    filter: invert(40%);
+    outline: 2px solid #0088cc;
+    outline-offset: 2px;
+  }
+  /* Телеграм иконка SVG */
+  #telegram-icon svg, #email-icon svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+    fill: #222;
+  }
+
+  /* Адаптив для маленьких экранов */
+  @media (max-width: 480px) {
+    #icons {
+      gap: 20px;
+      bottom: 20px;
     }
-    canvas {
-      display: block;
-      position: fixed;
-      top: 0; left: 0;
+    #icons a {
+      width: 36px;
+      height: 36px;
     }
-  </style>
+    #telegram-icon svg, #email-icon svg {
+      width: 36px;
+      height: 36px;
+    }
+  }
+</style>
 </head>
 <body>
-  <canvas></canvas>
 
-  <script>
-    // Вставь сюда весь JavaScript из моего предыдущего сообщения
-    const canvas = document.querySelector("canvas");
-    const ctx = canvas.getContext("2d");
+<canvas id="canvas"></canvas>
 
-    // Учитываем Retina дисплеи
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+<div id="icons">
+  <a href="https://t.me/shahsiya123" target="_blank" id="telegram-icon" aria-label="Telegram" tabindex="0">
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" >
+      <circle cx="120" cy="120" r="120" fill="#fff"/>
+      <path d="M97.7 164.6c-3.6 0-4.7-1.6-6.6-5.6l-18.4-37.6-37.4-12.1c-7.9-2.6-8-7.9 1.6-11.7l71.2-27.5c6.7-2.6 12.7 1.5 10.3 11l-15 67.2c-1.4 6.1-3.3 7.8-5.7 7.8z" fill="#0088cc"/>
+      <path d="M122.2 122.5l48.8-41.4c4.6-3.6 8.8-1.7 5.7 5.7l-38.1 59.7c-3.6 5.6-6.6 7.9-13.7 4.7l-18.3-13.7z" fill="#00b2ff"/>
+    </svg>
+  </a>
 
-    // Настройки анимации и частиц
-    const config = {
-      particleSize: 20,
-      maxFrame: 300,
-      explodeRadius: 150,
-      flyRadius: 70,
-      baseSpeed: 2,
-      text: "Окно",
-      font: "20px Arial",
-      shadowColor: "#00ff99",
-      particleColor: "#00ff99",
-    };
+  <a href="mailto:master_work@outlook.com" id="email-icon" aria-label="Email" tabindex="0">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#222" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+    </svg>
+  </a>
+</div>
 
-    // Фазы анимации
-    const PHASES = {
-      EXPLODE: "explode",
-      FLY: "fly",
-      DONE: "done",
-    };
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  let centerX, centerY;
 
-    // Easing функция (easeOutQuad)
-    function easeOutQuad(t) {
-      return t * (2 - t);
-    }
+  const lines = [
+    "Добро пожаловать! / Hoş geldiniz! / Welcome!",
+    "Я Khalid, также известен как Qirim Yurtu.",
+    "Frontend-разработка, Firebase, WordPress, Tilda.",
+    "Node.js, парсинг, автоматизация."
+  ];
 
-    // Класс частицы
-    class Particle {
-      constructor(x, y, symbol) {
-        this.homeX = x;
-        this.homeY = y;
-        this.symbol = symbol;
+  const particleSize = 20;
+  const particles = [];
+  let frame = 0;
 
-        this.x = x;
-        this.y = y;
+  const assembledPositions = [];
 
-        this.vx = 0;
-        this.vy = 0;
+  // Обновляем размеры, центр и пересоздаем частицы
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
 
-        this.radius = 0; // расстояние от центра (для фазы explode/ fly)
+    centerX = W / 2;
+    centerY = H / 2;
 
-        this.angle = Math.random() * 2 * Math.PI; // случайный угол движения на радиусе
+    assembledPositions.length = 0;  // Очистка перед заполнением
+    prepareAssembledPositions();
 
-        this.phase = PHASES.EXPLODE;
-        this.frame = 0;
+    createParticles();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function prepareAssembledPositions() {
+    assembledPositions.length = 0; // очистка
+
+    const totalHeight = lines.length * particleSize * 1.7;
+    const startY = centerY - totalHeight / 2;
+    for(let i=0; i<lines.length; i++) {
+      const line = lines[i];
+      const lineLength = line.length;
+      const startX = centerX - (lineLength * particleSize)/2;
+      for(let j=0; j<lineLength; j++) {
+        assembledPositions.push({
+          x: startX + j*particleSize,
+          y: startY + i*particleSize*1.7,
+          char: line[j]
+        });
       }
+    }
+  }
 
-      update(frameCount) {
-        const progress = frameCount / config.maxFrame;
-        switch (this.phase) {
-          case PHASES.EXPLODE:
-            // частица движется из центра к radius = explodeRadius
-            const easedProgress = easeOutQuad(progress);
-            this.radius = easedProgress * config.explodeRadius;
-            this.x = this.homeX + Math.cos(this.angle) * this.radius;
-            this.y = this.homeY + Math.sin(this.angle) * this.radius;
+  function createParticles() {
+    particles.length = 0;
+    for(let i=0; i<assembledPositions.length; i++) {
+      const pos = assembledPositions[i];
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 4 + Math.random()*3;
+      particles.push({
+        x: centerX,
+        y: centerY,
+        char: pos.char,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed,
+        targetX: pos.x,
+        targetY: pos.y,
+        phase: 'explode',
+        flyRadius: 100 + Math.random()*100,
+        flyAngle: Math.random()*Math.PI*2,
+        flySpeed: 0
+      });
+    }
+    frame = 0;
+    animationPhase = 'explode';
+  }
 
-            if (frameCount >= config.maxFrame) {
-              this.phase = PHASES.FLY;
-              this.frame = 0;
-              // При переходе в fly задаём начальную скорость для "прыжков"
-              this.vx = (Math.random() - 0.5) * config.baseSpeed;
-              this.vy = (Math.random() - 0.5) * config.baseSpeed;
-              this.radius = config.flyRadius;
-            }
-            break;
+  function lerp(a, b, t) {
+    return a + (b - a)*t;
+  }
 
-          case PHASES.FLY:
-            // Частицы двигаются случайно вокруг home с radius flyRadius, периодически приближаясь к home
-            this.x += this.vx;
-            this.y += this.vy;
+  let animationPhase = 'explode';
 
-            // Ограничиваем радиус от home
-            const dx = this.x - this.homeX;
-            const dy = this.y - this.homeY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
 
-            if (dist > config.flyRadius) {
-              // отражаем скорость, чтобы частица оставалась в пределах радиуса
-              this.vx = -this.vx;
-              this.vy = -this.vy;
-            }
+    ctx.font = `${particleSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
 
-            this.frame++;
-            if (this.frame > config.maxFrame / 2) {
-              // Начинаем собирать частицы обратно к home
-              this.phase = PHASES.DONE;
-              this.frame = 0;
-            }
-            break;
+    frame++;
 
-          case PHASES.DONE:
-            // Частица плавно возвращается к homeX, homeY
-            const ease = easeOutQuad(this.frame / (config.maxFrame / 2));
-            this.x = this.x + (this.homeX - this.x) * ease;
-            this.y = this.y + (this.homeY - this.y) * ease;
-            this.frame++;
+    let allAssembled = true;
 
-            if (this.frame >= config.maxFrame / 2) {
-              // Анимация завершена, можно заморозить частицы или перезапускать
-              this.x = this.homeX;
-              this.y = this.homeY;
-            }
-            break;
+    for(let p of particles) {
+      if(p.phase === 'explode') {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.95;
+        p.vy *= 0.95;
+        if(Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
+          p.phase = 'fly';
+          p.flyRadius = 150 + Math.random()*150;
+          p.flyAngle = Math.random()*Math.PI*2;
+          p.flySpeed = 0.015 + Math.random()*0.015;
+        }
+      } 
+      
+      if(p.phase === 'fly') {
+        if(frame > 300) {
+          p.flyRadius = lerp(p.flyRadius, 0, 0.02);
+          if(p.flyRadius < 1) {
+            p.x = lerp(p.x, p.targetX, 0.1);
+            p.y = lerp(p.y, p.targetY, 0.1);
+          } else {
+            p.flyAngle += p.flySpeed;
+            p.x = lerp(p.x, p.targetX + p.flyRadius * Math.cos(p.flyAngle), 0.1);
+            p.y = lerp(p.y, p.targetY + p.flyRadius * Math.sin(p.flyAngle), 0.1);
+          }
+        } else {
+          p.flyAngle += p.flySpeed;
+          p.x += Math.cos(p.flyAngle) * 1.5;
+          p.y += Math.sin(p.flyAngle) * 1.5;
+        }
+        if(Math.abs(p.x - p.targetX) > 2 || Math.abs(p.y - p.targetY) > 2 || p.flyRadius > 1) {
+          allAssembled = false;
         }
       }
 
-      draw(ctx) {
-        ctx.font = `${config.particleSize}px Arial`;
-        ctx.fillStyle = config.particleColor;
-        ctx.shadowColor = config.shadowColor;
-        ctx.shadowBlur = 5;
-        ctx.fillText(this.symbol, this.x, this.y);
-      }
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.15)';
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = '#222';
+      ctx.fillText(p.char, p.x, p.y);
+      ctx.restore();
     }
 
-    // Создаём массив частиц на основе текста
-    function createParticles(text) {
-      ctx.font = config.font;
-      const particles = [];
-
-      // Чтобы получить позицию символов, будем рассчитывать ширину каждого символа и сдвигать
-      let offsetX = 50; // стартовая позиция по X
-      const offsetY = canvas.height / 2; // вертикальный центр
-
-      for (const char of text) {
-        const width = ctx.measureText(char).width;
-
-        // позиция частицы - центр символа по X и Y (примерно)
-        const x = offsetX + width / 2;
-        const y = offsetY;
-
-        particles.push(new Particle(x, y, char));
-
-        offsetX += width;
-      }
-
-      return particles;
-    }
-
-    let particles = createParticles(config.text);
-
-    let frameCount = 0;
-
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (const p of particles) {
-        p.update(frameCount);
-        p.draw(ctx);
-      }
-
-      frameCount++;
-
-      // Можно циклично повторять анимацию:
-      if (frameCount > config.maxFrame * 2) {
-        frameCount = 0;
-        particles = createParticles(config.text);
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-  </script>
-</body>
-</html>
+    if(animationPhase !== 'done') {
+      if(allAssembled && frame > 300) {
+        animationPhase = 'done';
