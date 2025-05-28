@@ -58,23 +58,42 @@
 <script>
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
+
   let W, H;
+  let particleSize;
+  let dpr = window.devicePixelRatio || 1;
 
   function setupCanvas() {
-    const dpr = window.devicePixelRatio || 1;
     W = window.innerWidth;
     H = window.innerHeight;
+
+    // Адаптивный размер шрифта и частицы в зависимости от ширины
+    if (W < 400) {
+      particleSize = 20; // для маленьких телефонов
+    } else if (W < 768) {
+      particleSize = 28; // для планшетов и небольших экранов
+    } else {
+      particleSize = 32; // для десктопов
+    }
+
     canvas.width = W * dpr;
     canvas.height = H * dpr;
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
+
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
     ctx.imageSmoothingEnabled = false;
-  }
-  setupCanvas();
-  window.addEventListener('resize', setupCanvas);
 
+    prepareAssembledPositions();
+    createParticles();
+  }
+
+  window.addEventListener('resize', () => {
+    setupCanvas();
+  });
+
+  // Тексты остаются те же
   const lines = [
     "Добро пожаловать! / Hoş geldiniz! / Welcome!",
     "Я Khalid, также известен как Qirim Yurtu.",
@@ -82,15 +101,16 @@
     "Node.js, парсинг, автоматизация."
   ];
 
-  const particleSize = 32;
-  const particles = [];
+  let particles = [];
   let frame = 0;
   let animationPhase = 'explode';
 
-  const centerX = () => W / 2;
-  const centerY = () => H / 2;
+  let assembledPositions = [];
 
-  const assembledPositions = [];
+  function centerX() { return W / 2; }
+  function centerY() { return H / 2; }
+
+  // Пересчитываем позиции для текста, с учётом particleSize
   function prepareAssembledPositions() {
     assembledPositions.length = 0;
     const totalHeight = lines.length * particleSize * 1.8;
@@ -108,7 +128,6 @@
       }
     }
   }
-  prepareAssembledPositions();
 
   function createParticles() {
     particles.length = 0;
@@ -132,32 +151,26 @@
       });
     }
   }
-  createParticles();
 
   function lerp(a, b, t) {
     return a + (b - a) * t;
   }
 
   function drawTextWithEffects(p, x, y) {
-    // 1) Нарисовать мягкий цветной контур (outer glow)
     ctx.shadowColor = 'rgba(0, 140, 255, 0.6)';
     ctx.shadowBlur = 8;
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'rgba(0, 100, 180, 0.8)';
     ctx.strokeText(p.char, x, y);
 
-    // 2) Градиентная заливка текста
     const grad = ctx.createLinearGradient(x, y - particleSize / 2, x, y + particleSize / 2);
-    grad.addColorStop(0, '#00c6ff');  // яркий голубой сверху
-    grad.addColorStop(1, '#0072ff');  // насыщенный синий снизу
+    grad.addColorStop(0, '#00c6ff');
+    grad.addColorStop(1, '#0072ff');
 
     ctx.fillStyle = grad;
     ctx.shadowColor = 'rgba(0,0,0,0.1)';
     ctx.shadowBlur = 1;
     ctx.fillText(p.char, x, y);
-
-    // 3) Лёгкий наклон (перекос) для динамики (смещаем канвас немного)
-    // Это проще сделать в анимации, но здесь для удобства пропустим или сделаем в глобальной трансформации
   }
 
   function animate() {
@@ -205,8 +218,6 @@
       }
 
       ctx.globalAlpha = p.opacity;
-
-      // Нарисовать символ с эффектами
       drawTextWithEffects(p, p.x, p.y);
     }
 
@@ -223,6 +234,8 @@
     }
   }
 
+  // Инициализация
+  setupCanvas();
   animate();
 </script>
 
