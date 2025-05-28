@@ -76,15 +76,15 @@ html, body {
 /* Медиазапросы */
 @media (max-width: 768px) {
   #icons img {
-    width: 17px;
-    height: 20px;
+    width: 36px;
+    height: 32px;
   }
 }
 
 @media (max-width: 480px) {
   #icons img {
-    width: 15px;
-    height: 20px;
+    width: 32px;
+    height: 32px;
   }
 
   #icons {
@@ -131,23 +131,33 @@ html, body {
     function centerX() { return W / 2; }
     function centerY() { return H / 2; }
 
-    function getMaxFittingParticleSize() {
-      const longestLine = lines.reduce((a, b) => (a.length > b.length ? a : b));
-      const padding = 40;
-      const availableWidth = W - padding;
+   function getMaxFittingParticleSize() {
+  const longestLine = lines.reduce((a, b) => (a.length > b.length ? a : b));
+  const padding = 40;
+  const availableWidth = W - padding;
 
-      let size = 32;
-      ctx.font = `bold ${size}px 'Poppins', sans-serif`;
-      let textWidth = ctx.measureText(longestLine).width;
+  // Устанавливаем начальный размер шрифта в зависимости от ширины экрана
+  let size;
+  if (W < 480) {
+    size = 20; // для телефонов
+  } else if (W < 768) {
+    size = 28; // для планшетов
+  } else {
+    size = 32; // для десктопа
+  }
 
-      while (textWidth > availableWidth && size > 10) {
-        size -= 1;
-        ctx.font = `bold ${size}px 'Poppins', sans-serif`;
-        textWidth = ctx.measureText(longestLine).width;
-      }
+  ctx.font = `bold ${size}px 'Poppins', sans-serif`;
+  let textWidth = ctx.measureText(longestLine).width;
 
-      return size;
-    }
+  // Подгоняем размер под доступную ширину
+  while (textWidth > availableWidth && size > 10) {
+    size -= 1;
+    ctx.font = `bold ${size}px 'Poppins', sans-serif`;
+    textWidth = ctx.measureText(longestLine).width;
+  }
+
+  return size;
+}
 
     function setupCanvas() {
       W = window.innerWidth;
