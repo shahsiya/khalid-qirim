@@ -1,216 +1,173 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Анимация частиц с летящими иконками</title>
-<style>
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
-  html, body {
-    height: 100%; background: #fff; overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
-  }
-  canvas {
-    display: block;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #fff;
-    z-index: 1;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qirim Yurtu</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #fff;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    a {
+      position: absolute;
+      z-index: 10;
+      color: transparent;
+    }
+  </style>
 </head>
 <body>
-
 <canvas id="canvas"></canvas>
 
+<!-- Ссылки -->
+<a id="telegram" href="https://t.me/yourusername" target="_blank" style="left:-100px;top:-100px;">tg</a>
+<a id="email" href="mailto:your@email.com" target="_blank" style="left:-100px;top:-100px;">mail</a>
+
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let W, H;
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let w = (canvas.width = window.innerWidth);
+let h = (canvas.height = window.innerHeight);
+window.addEventListener("resize", () => {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+  start();
+});
 
-function resize() {
-  W = window.innerWidth;
-  H = window.innerHeight;
-  canvas.width = W;
-  canvas.height = H;
-}
-resize();
-window.addEventListener('resize', resize);
-
-// Текстовые строки
-const lines = [
-  "Добро пожаловать! / Hoş geldiniz! / Welcome!",
-  "Я Khalid, также известен как Qirim Yurtu.",
-  "Frontend-разработка, Firebase, WordPress, Tilda.",
-  "Node.js, парсинг, автоматизация."
+const textLines = [
+  "Привет, я Qirim Yurtu!",
+  "Frontend, Firebase, Node.js",
 ];
 
-// Параметры частиц
-const particleSize = 16;
-const gap = 14;
+const iconData = {
+  telegram: [
+    [2,4],[3,3],[4,2],[5,2],[6,3],[7,4],[8,5],[8,6],[7,7],[6,7],[5,6],[4,5],[3,6],[2,7],[1,7],[1,6]
+  ],
+  mail: [
+    [1,2],[2,1],[3,1],[4,2],[4,3],[4,4],[3,5],[2,5],[1,4],[1,3]
+  ]
+};
 
-// Центр экрана
-const centerX = W/2;
-const centerY = H/2 - 60;
-
-// Частицы (объекты)
 const particles = [];
+let positions = [];
 
-// Анимация фаз: explode -> fly -> assemble -> done
-let phase = 'explode';
-let frameCount = 0;
+function getTextPoints(lines, fontSize = 18) {
+  const offscreen = document.createElement("canvas");
+  const ctx2 = offscreen.getContext("2d");
+  offscreen.width = w;
+  offscreen.height = h;
+  ctx2.fillStyle = "#000";
+  ctx2.font = `${fontSize}px sans-serif`;
+  ctx2.textAlign = "center";
+  ctx2.textBaseline = "middle";
 
-// Подготовка текста — собираем координаты символов
-function prepareTextPositions() {
-  const positions = [];
-  const lineHeight = particleSize * 1.7;
-  const startY = centerY - lines.length/2 * lineHeight;
-  
-  ctx.font = `${particleSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
-  ctx.textBaseline = 'middle';
-  ctx.textAlign = 'left';
-
-  for(let i=0; i<lines.length; i++) {
-    const line = lines[i];
-    const textWidth = ctx.measureText(line).width;
-    const startX = centerX - textWidth/2;
-    for(let j=0; j<line.length; j++) {
-      let char = line[j];
-      // x позиция каждого символа — измеряем текст по символам
-      let slice = line.slice(0,j);
-      let x = startX + ctx.measureText(slice).width + particleSize/2;
-      let y = startY + i*lineHeight;
-      positions.push({x,y,char});
-    }
-  }
-  return positions;
-}
-
-// Минималистичные иконки Телеграма и почты как точки для частиц
-
-// Пиксельные точки для иконки Телеграма (простой силуэт из точек)
-const telegramPixels = [
-  [1,4],[2,3],[3,2],[4,2],[5,3],[6,4],[7,5],[7,6],[6,7],[5,7],[4,6],[3,5],[2,6],[1,7],[0,7],[0,6]
-];
-
-// Пиксельные точки для иконки почты (конверт)
-const mailPixels = [
-  [0,1],[1,0],[2,0],[3,0],[4,1],[4,2],[4,3],[4,4],[3,5],[2,5],[1,5],[0,4],[0,3],[0,2]
-];
-
-// Функция создания позиций для иконок из точек с заданной позицией центра
-function prepareIconPositions(pixels, centerX, centerY, scale=12) {
-  const positions = [];
-  for (const [x,y] of pixels) {
-    positions.push({
-      x: centerX + (x - 2)*scale,
-      y: centerY + (y - 3)*scale,
-      char: '•'
-    });
-  }
-  return positions;
-}
-
-// Создаём позиции текста и иконок
-const textPositions = prepareTextPositions();
-const telegramPositions = prepareIconPositions(telegramPixels, centerX - 80, centerY + 140);
-const mailPositions = prepareIconPositions(mailPixels, centerX + 80, centerY + 140);
-
-// Объединяем все позиции
-const allPositions = [...textPositions, ...telegramPositions, ...mailPositions];
-
-// Создаём частицы в центре с рандомной скоростью
-function createParticles() {
-  particles.length = 0;
-  for (const pos of allPositions) {
-    const angle = Math.random()*Math.PI*2;
-    const speed = 4 + Math.random()*3;
-    particles.push({
-      x: centerX,
-      y: centerY,
-      vx: Math.cos(angle)*speed,
-      vy: Math.sin(angle)*speed,
-      targetX: pos.x,
-      targetY: pos.y,
-      char: pos.char,
-      phase: 'explode',
-      flyRadius: 100 + Math.random()*150,
-      flyAngle: Math.random()*Math.PI*2,
-      flySpeed: 0.015 + Math.random()*0.015,
-    });
-  }
-}
-
-createParticles();
-
-function lerp(a,b,t) {
-  return a + (b - a)*t;
-}
-
-function animate() {
-  ctx.clearRect(0,0,W,H);
-
-  ctx.font = `${particleSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
-  ctx.textBaseline = 'middle';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#222';
-
-  frameCount++;
-
-  let allAssembled = true;
-
-  for(const p of particles) {
-    if(p.phase === 'explode') {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vx *= 0.92;
-      p.vy *= 0.92;
-      if(Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
-        p.phase = 'fly';
-      }
-    } 
-    else if(p.phase === 'fly') {
-      p.flyAngle += p.flySpeed;
-      p.x = lerp(p.x, p.targetX + p.flyRadius * Math.cos(p.flyAngle), 0.1);
-      p.y = lerp(p.y, p.targetY + p.flyRadius * Math.sin(p.flyAngle), 0.1);
-
-      // После 250 фреймов начинаем уменьшать радиус вращения к 0
-      if(frameCount > 250) {
-        p.flyRadius = lerp(p.flyRadius, 0, 0.02);
-        if(p.flyRadius < 1) {
-          p.phase = 'assemble';
+  const points = [];
+  const gap = 6;
+  lines.forEach((line, i) => {
+    ctx2.clearRect(0, 0, w, h);
+    ctx2.fillText(line, w / 2, h / 2 + (i - lines.length / 2) * 40);
+    const imageData = ctx2.getImageData(0, 0, w, h).data;
+    for (let y = 0; y < h; y += gap) {
+      for (let x = 0; x < w; x += gap) {
+        const index = (y * w + x) * 4;
+        if (imageData[index + 3] > 128) {
+          points.push({ x, y });
         }
       }
-    } 
-    else if(p.phase === 'assemble') {
-      p.x = lerp(p.x, p.targetX, 0.15);
-      p.y = lerp(p.y, p.targetY, 0.15);
-      if(Math.abs(p.x - p.targetX) > 2 || Math.abs(p.y - p.targetY) > 2) {
-        allAssembled = false;
-      }
     }
-    else if(p.phase === 'done') {
-      p.x = p.targetX;
-      p.y = p.targetY;
-    }
-
-    ctx.fillText(p.char, p.x, p.y);
-  }
-
-  if(allAssembled && phase !== 'done') {
-    phase = 'done';
-    for(const p of particles) p.phase = 'done';
-  } else {
-    requestAnimationFrame(animate);
-  }
+  });
+  return points;
 }
 
-animate();
-</script>
+function getIconPoints(icon, centerX, centerY, scale = 6) {
+  return icon.map(([x, y]) => ({
+    x: centerX + x * scale,
+    y: centerY + y * scale,
+  }));
+}
 
+function createParticlesFromPositions(posList) {
+  particles.length = 0;
+  posList.forEach((p) => {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 5 + 2;
+    particles.push({
+      x: w / 2,
+      y: h / 2,
+      targetX: p.x,
+      targetY: p.y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      phase: "explode",
+      angle: Math.random() * Math.PI * 2,
+      radius: Math.random() * 100 + 50,
+    });
+  });
+}
+
+function update() {
+  ctx.clearRect(0, 0, w, h);
+  let allDone = true;
+
+  particles.forEach((p) => {
+    if (p.phase === "explode") {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.9;
+      p.vy *= 0.9;
+      if (Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
+        p.phase = "orbit";
+      }
+    } else if (p.phase === "orbit") {
+      p.angle += 0.02;
+      p.radius *= 0.97;
+      p.x = p.targetX + Math.cos(p.angle) * p.radius;
+      p.y = p.targetY + Math.sin(p.angle) * p.radius;
+      if (p.radius < 1) {
+        p.phase = "assemble";
+      }
+    } else if (p.phase === "assemble") {
+      p.x += (p.targetX - p.x) * 0.1;
+      p.y += (p.targetY - p.y) * 0.1;
+      if (Math.abs(p.x - p.targetX) > 0.5 || Math.abs(p.y - p.targetY) > 0.5) {
+        allDone = false;
+      }
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = "#000";
+    ctx.fill();
+  });
+
+  if (!allDone) requestAnimationFrame(update);
+}
+
+function start() {
+  const textPoints = getTextPoints(textLines);
+  const telegramIcon = getIconPoints(iconData.telegram, w / 2 - 100, h / 2 + 100);
+  const mailIcon = getIconPoints(iconData.mail, w / 2 + 100, h / 2 + 100);
+
+  // Центры для ссылок
+  const tg = document.getElementById("telegram");
+  tg.style.left = w / 2 - 100 + "px";
+  tg.style.top = h / 2 + 100 + "px";
+  const mail = document.getElementById("email");
+  mail.style.left = w / 2 + 100 + "px";
+  mail.style.top = h / 2 + 100 + "px";
+
+  positions = [...textPoints, ...telegramIcon, ...mailIcon];
+  createParticlesFromPositions(positions);
+  update();
+}
+
+start();
+</script>
 </body>
 </html>
