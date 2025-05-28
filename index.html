@@ -1,41 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Khalid / Qirim Yurtu</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; background: #000; overflow: hidden; font-family: monospace; color: white; }
-    #countdown { 
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      font-size: 6rem; z-index: 10;
-    }
-    #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-    .content-piece {
+    html, body { height: 100%; background: black; overflow: hidden; font-family: monospace; }
+    canvas { position: absolute; top: 0; left: 0; z-index: 0; }
+    .content-line {
       position: absolute;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       color: #00ff99;
       opacity: 0;
-      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 1s;
       z-index: 5;
     }
   </style>
 </head>
 <body>
-  <div id="countdown">5</div>
   <canvas id="canvas"></canvas>
 
   <script>
-    const countdownEl = document.getElementById('countdown');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
 
-    let countdown = 5;
-    const particles = [];
-    const letters = '01@#%QWERTYASDZXCVkırımlı';
+    const letters = "01@#%QWERTYASDZXCVkırımlı";
     const content = [
       'Добро пожаловать! / Hoş geldiniz! / Welcome!',
       'Я Khalid, также известен как Qirim Yurtu.',
@@ -43,123 +36,99 @@
       'Node.js, парсинг, автоматизация.',
       'Контакты: @shahsiya123 | master_work@outlook.com'
     ];
-    const contentElements = [];
+
+    let particles = [];
+    let frame = 0;
+    let assembling = false;
 
     const sounds = {
-      tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
-      boom: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-small-explosion-1688.mp3'),
-      type: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-typewriter-key-1123.mp3'),
-      hum: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-space-ambience-1739.mp3')
+      boom: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-fast-small-explosion-1688.mp3"),
+      hum: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-space-ambience-1739.mp3")
     };
 
-    function doCountdown() {
-      if (countdown > 0) {
-        countdownEl.textContent = countdown;
-        sounds.tick.play();
-        countdown--;
-        setTimeout(doCountdown, 1000);
-      } else {
-        triggerExplosion();
-      }
-    }
+    sounds.hum.loop = true;
 
-    function triggerExplosion() {
-      countdownEl.style.display = 'none';
-      sounds.boom.play();
-      sounds.hum.loop = true;
-      sounds.hum.play();
-      for (let i = 0; i < 600; i++) {
+    function createExplosionParticles() {
+      for (let i = 0; i < 700; i++) {
         particles.push({
           x: canvas.width / 2,
           y: canvas.height / 2,
-          dx: (Math.random() - 0.5) * 12,
-          dy: (Math.random() - 0.5) * 12,
+          dx: (Math.random() - 0.5) * 15,
+          dy: (Math.random() - 0.5) * 15,
           char: letters[Math.floor(Math.random() * letters.length)],
           opacity: 1,
           stage: 'scatter',
           targetX: null,
           targetY: null,
-          contentPiece: null
+          lineIndex: null
         });
       }
-      requestAnimationFrame(animateParticles);
     }
 
-    function createContentElements() {
-      const spacing = 50;
-      content.forEach((text, i) => {
-        const el = document.createElement('div');
-        el.classList.add('content-piece');
-        el.textContent = text;
-        document.body.appendChild(el);
+    function assembleContent() {
+      let index = 0;
+      content.forEach((line, i) => {
+        const div = document.createElement("div");
+        div.classList.add("content-line");
+        div.textContent = line;
+        document.body.appendChild(div);
+        const x = window.innerWidth / 2 - line.length * 10;
+        const y = window.innerHeight / 2 - (content.length * 25) / 2 + i * 30;
+        div.style.left = `${x}px`;
+        div.style.top = `${y}px`;
 
-        const left = window.innerWidth / 2 - 300;
-        const top = window.innerHeight / 2 - (content.length / 2 * spacing) + i * spacing;
-
-        el.style.left = `${left}px`;
-        el.style.top = `${top}px`;
-
-        contentElements.push({ el, left, top });
-      });
-
-      for (let i = 0; i < contentElements.length; i++) {
-        for (let j = 0; j < 15; j++) {
-          const index = i * 15 + j;
-          if (index >= particles.length) continue;
-          const part = particles[index];
-          part.stage = 'assemble';
-          part.targetX = contentElements[i].left + Math.random() * 300;
-          part.targetY = contentElements[i].top + Math.random() * 20;
-          part.contentPiece = contentElements[i].el;
+        for (let j = 0; j < line.length; j++) {
+          if (index >= particles.length) break;
+          const p = particles[index];
+          p.targetX = x + j * 14;
+          p.targetY = y;
+          p.stage = 'assemble';
+          p.lineIndex = i;
+          index++;
         }
-      }
+
+        setTimeout(() => div.style.opacity = 1, 2000 + i * 300);
+      });
     }
 
-    let contentTriggered = false;
-
-    function animateParticles() {
+    function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = '20px monospace';
+      ctx.font = "20px monospace";
+      let assemblingDone = 0;
 
-      let assembledCount = 0;
-
-      for (let p of particles) {
+      particles.forEach(p => {
         if (p.stage === 'scatter') {
           p.x += p.dx;
           p.y += p.dy;
-          p.opacity -= 0.008;
-          if (p.opacity <= 0.6 && !contentTriggered) {
-            contentTriggered = true;
-            createContentElements();
+          p.opacity -= 0.007;
+          if (p.opacity < 0.6 && !assembling) {
+            assembling = true;
+            assembleContent();
           }
         } else if (p.stage === 'assemble') {
           p.x += (p.targetX - p.x) * 0.05;
           p.y += (p.targetY - p.y) * 0.05;
           if (Math.abs(p.x - p.targetX) < 2 && Math.abs(p.y - p.targetY) < 2) {
             p.stage = 'done';
-            if (p.contentPiece) p.contentPiece.style.opacity = 1;
-            assembledCount++;
           }
         }
         ctx.fillStyle = `rgba(0,255,0,${p.opacity})`;
         ctx.fillText(p.char, p.x, p.y);
-      }
+        if (p.stage === 'done') assemblingDone++;
+      });
 
-      if (assembledCount < contentElements.length * 15) {
-        requestAnimationFrame(animateParticles);
+      if (assemblingDone < content.length * 30) {
+        requestAnimationFrame(animate);
       } else {
         sounds.hum.pause();
-        redirectAfterAnimation();
       }
     }
 
-    function redirectAfterAnimation() {
-      setTimeout(() => {
-        window.location.href = "main.html"; // Укажите нужный URL страницы
-      }, 1500);
-    }
-
-    doCountdown();
+    // Старт
+    sounds.boom.play();
+    sounds.hum.play();
+    createExplosionParticles();
+    animate();
   </script>
 </body>
 </html>
