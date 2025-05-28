@@ -1,172 +1,162 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Qirim Yurtu</title>
+  <title>Khalid / Qirim Yurtu</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #fff;
-      font-family: sans-serif;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #fff; overflow: hidden; font-family: monospace; color: black; }
+    #countdown { 
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 6rem; z-index: 10;
     }
-    canvas {
-      display: block;
-    }
-    a {
+    #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    .content-piece {
       position: absolute;
-      z-index: 10;
-      color: transparent;
+      font-size: 1.5rem;
+      color: #000;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .icon {
+      font-size: 2rem;
+      pointer-events: auto;
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-yzS8A7tulq7RyzpuuO3u3j1k6v9z0i2JSjxq3HqF4m/5HJqDd0wL1kTnHXrVKPc+SkNhEMBB28U1flXGvYwtGw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-<canvas id="canvas"></canvas>
+  <div id="countdown">5</div>
+  <canvas id="canvas"></canvas>
 
-<!-- Ссылки -->
-<a id="telegram" href="https://t.me/yourusername" target="_blank" style="left:-100px;top:-100px;">tg</a>
-<a id="email" href="mailto:your@email.com" target="_blank" style="left:-100px;top:-100px;">mail</a>
+  <script>
+    const countdownEl = document.getElementById('countdown');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-<script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-let w = (canvas.width = window.innerWidth);
-let h = (canvas.height = window.innerHeight);
-window.addEventListener("resize", () => {
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
-  start();
-});
+    let countdown = 5;
+    const particles = [];
+    const letters = '01@#%QWERTYASDZXCVkırımlı';
+    const content = [
+      'Добро пожаловать! / Hoş geldiniz! / Welcome!',
+      'Я Khalid, также известен как Qirim Yurtu.',
+      'Frontend, Firebase, WordPress, Tilda.',
+      'Node.js, парсинг, автоматизация.',
+      '<a href="https://t.me/shahsiya123" class="icon"><i class="fab fa-telegram"></i></a> <a href="mailto:master_work@outlook.com" class="icon"><i class="fas fa-envelope"></i></a>'
+    ];
+    const contentElements = [];
 
-const textLines = [
-  "Привет, я Qirim Yurtu!",
-  "Frontend, Firebase, Node.js",
-];
+    const sounds = {
+      tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
+      boom: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-small-explosion-1688.mp3'),
+      hum: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-space-ambience-1739.mp3')
+    };
 
-const iconData = {
-  telegram: [
-    [2,4],[3,3],[4,2],[5,2],[6,3],[7,4],[8,5],[8,6],[7,7],[6,7],[5,6],[4,5],[3,6],[2,7],[1,7],[1,6]
-  ],
-  mail: [
-    [1,2],[2,1],[3,1],[4,2],[4,3],[4,4],[3,5],[2,5],[1,4],[1,3]
-  ]
-};
+    function doCountdown() {
+      if (countdown > 0) {
+        countdownEl.textContent = countdown;
+        sounds.tick.play();
+        countdown--;
+        setTimeout(doCountdown, 1000);
+      } else {
+        triggerExplosion();
+      }
+    }
 
-const particles = [];
-let positions = [];
+    function triggerExplosion() {
+      countdownEl.style.display = 'none';
+      sounds.boom.play();
+      sounds.hum.loop = true;
+      sounds.hum.play();
+      for (let i = 0; i < 600; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          dx: (Math.random() - 0.5) * 10,
+          dy: (Math.random() - 0.5) * 10,
+          char: letters[Math.floor(Math.random() * letters.length)],
+          opacity: 1,
+          stage: 'scatter',
+          targetX: null,
+          targetY: null,
+          contentPiece: null
+        });
+      }
+      requestAnimationFrame(animateParticles);
+    }
 
-function getTextPoints(lines, fontSize = 18) {
-  const offscreen = document.createElement("canvas");
-  const ctx2 = offscreen.getContext("2d");
-  offscreen.width = w;
-  offscreen.height = h;
-  ctx2.fillStyle = "#000";
-  ctx2.font = `${fontSize}px sans-serif`;
-  ctx2.textAlign = "center";
-  ctx2.textBaseline = "middle";
+    function createContentElements() {
+      const spacing = 50;
+      content.forEach((text, i) => {
+        const el = document.createElement('div');
+        el.classList.add('content-piece');
+        el.innerHTML = text;
+        document.body.appendChild(el);
 
-  const points = [];
-  const gap = 6;
-  lines.forEach((line, i) => {
-    ctx2.clearRect(0, 0, w, h);
-    ctx2.fillText(line, w / 2, h / 2 + (i - lines.length / 2) * 40);
-    const imageData = ctx2.getImageData(0, 0, w, h).data;
-    for (let y = 0; y < h; y += gap) {
-      for (let x = 0; x < w; x += gap) {
-        const index = (y * w + x) * 4;
-        if (imageData[index + 3] > 128) {
-          points.push({ x, y });
+        const left = window.innerWidth / 2 - 300;
+        const top = window.innerHeight / 2 - (content.length / 2 * spacing) + i * spacing;
+
+        el.style.left = `${left}px`;
+        el.style.top = `${top}px`;
+
+        contentElements.push({ el, left, top });
+      });
+
+      for (let i = 0; i < contentElements.length; i++) {
+        for (let j = 0; j < 15; j++) {
+          const index = i * 15 + j;
+          if (index >= particles.length) continue;
+          const part = particles[index];
+          part.stage = 'assemble';
+          part.targetX = contentElements[i].left + Math.random() * 300;
+          part.targetY = contentElements[i].top + Math.random() * 20;
+          part.contentPiece = contentElements[i].el;
         }
       }
     }
-  });
-  return points;
-}
 
-function getIconPoints(icon, centerX, centerY, scale = 6) {
-  return icon.map(([x, y]) => ({
-    x: centerX + x * scale,
-    y: centerY + y * scale,
-  }));
-}
+    let contentTriggered = false;
 
-function createParticlesFromPositions(posList) {
-  particles.length = 0;
-  posList.forEach((p) => {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 5 + 2;
-    particles.push({
-      x: w / 2,
-      y: h / 2,
-      targetX: p.x,
-      targetY: p.y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      phase: "explode",
-      angle: Math.random() * Math.PI * 2,
-      radius: Math.random() * 100 + 50,
-    });
-  });
-}
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = '20px monospace';
 
-function update() {
-  ctx.clearRect(0, 0, w, h);
-  let allDone = true;
+      let assembledCount = 0;
 
-  particles.forEach((p) => {
-    if (p.phase === "explode") {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vx *= 0.9;
-      p.vy *= 0.9;
-      if (Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
-        p.phase = "orbit";
+      for (let p of particles) {
+        if (p.stage === 'scatter') {
+          p.x += p.dx;
+          p.y += p.dy;
+          p.opacity -= 0.008;
+          if (p.opacity <= 0.6 && !contentTriggered) {
+            contentTriggered = true;
+            createContentElements();
+          }
+        } else if (p.stage === 'assemble') {
+          p.x += (p.targetX - p.x) * 0.03;
+          p.y += (p.targetY - p.y) * 0.03;
+          if (Math.abs(p.x - p.targetX) < 2 && Math.abs(p.y - p.targetY) < 2) {
+            p.stage = 'done';
+            if (p.contentPiece) p.contentPiece.style.opacity = 1;
+            assembledCount++;
+          }
+        }
+        ctx.fillStyle = `rgba(0,0,0,${p.opacity})`;
+        ctx.fillText(p.char, p.x, p.y);
       }
-    } else if (p.phase === "orbit") {
-      p.angle += 0.02;
-      p.radius *= 0.97;
-      p.x = p.targetX + Math.cos(p.angle) * p.radius;
-      p.y = p.targetY + Math.sin(p.angle) * p.radius;
-      if (p.radius < 1) {
-        p.phase = "assemble";
-      }
-    } else if (p.phase === "assemble") {
-      p.x += (p.targetX - p.x) * 0.1;
-      p.y += (p.targetY - p.y) * 0.1;
-      if (Math.abs(p.x - p.targetX) > 0.5 || Math.abs(p.y - p.targetY) > 0.5) {
-        allDone = false;
+
+      if (assembledCount < contentElements.length * 15) {
+        requestAnimationFrame(animateParticles);
+      } else {
+        sounds.hum.pause();
       }
     }
 
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = "#000";
-    ctx.fill();
-  });
-
-  if (!allDone) requestAnimationFrame(update);
-}
-
-function start() {
-  const textPoints = getTextPoints(textLines);
-  const telegramIcon = getIconPoints(iconData.telegram, w / 2 - 100, h / 2 + 100);
-  const mailIcon = getIconPoints(iconData.mail, w / 2 + 100, h / 2 + 100);
-
-  const tg = document.getElementById("telegram");
-  tg.style.left = w / 2 - 100 + "px";
-  tg.style.top = h / 2 + 100 + "px";
-  const mail = document.getElementById("email");
-  mail.style.left = w / 2 + 100 + "px";
-  mail.style.top = h / 2 + 100 + "px";
-
-  positions = [...textPoints, ...telegramIcon, ...mailIcon];
-  createParticlesFromPositions(positions);
-  update();
-}
-
-start();
-</script>
+    doCountdown();
+  </script>
 </body>
 </html>
