@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khalid / Qirim Yurtu</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fdfdfd;
+      color: #222;
+      line-height: 1.6;
+    }
+    header {
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border-bottom: 1px solid #eaeaea;
+    }
+    nav select {
+      padding: 0.3rem;
+      font-size: 1rem;
+    }
+    main {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    .lang {
+      display: none;
+    }
+    .lang.active {
+      display: block;
+    }
+    .projects {
+      margin-top: 2rem;
+    }
+    .projects ul {
+      padding-left: 1rem;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Khalid / Qirim Yurtu</h2>
+    <nav>
+      <select id="langSwitch">
+        <option value="en">EN</option>
+        <option value="ru">RU</option>
+        <option value="tr">TR</option>
+      </select>
+    </nav>
+  </header>
+
+  <main>
+    <section class="lang lang-en active">
+      <h1>About Me</h1>
+      <p>Hi, I'm Khalid — an aspiring full-stack developer focused on automation, data parsing, and digital integrations. I'm skilled in Firebase, Node.js, WordPress, Tilda, Google Apps Script and GitHub. Passionate about creating digital tools that help people and businesses.</p>
+
+      <h2>Contacts</h2>
+      <ul>
+        <li>Email: <a href="mailto:master_work@outlook.com">master_work@outlook.com</a></li>
+        <li>Telegram: <a href="https://t.me/shahsiya123">@shahsiya123</a></li>
+        <li>LinkedIn: <a href="https://www.linkedin.com/me">linkedin.com/me</a></li>
+        <li>GitHub: <a href="https://github.com">github.com</a> (auto projects below)</li>
+      </ul>
+    </section>
+
+    <section class="lang lang-ru">
+      <h1>Обо мне</h1>
+      <p>Привет! Я Халид — начинающий full-stack разработчик, специализируюсь на автоматизации, парсерах и цифровой интеграции. Знаю Firebase, Node.js, WordPress, Tilda, Google Apps Script и GitHub. Хочу создавать полезные цифровые инструменты для людей и бизнеса.</p>
+
+      <h2>Контакты</h2>
+      <ul>
+        <li>Email: <a href="mailto:master_work@outlook.com">master_work@outlook.com</a></li>
+        <li>Telegram: <a href="https://t.me/shahsiya123">@shahsiya123</a></li>
+        <li>LinkedIn: <a href="https://www.linkedin.com/me">linkedin.com/me</a></li>
+        <li>GitHub: <a href="https://github.com">github.com</a> (проекты ниже)</li>
+      </ul>
+    </section>
+
+    <section class="lang lang-tr">
+      <h1>Hakkımda</h1>
+      <p>Merhaba! Ben Khalid — otomasyon, veri toplama ve dijital entegrasyonlar üzerine çalışan genç bir full-stack geliştiriciyim. Firebase, Node.js, WordPress, Tilda, Google Apps Script ve GitHub konularında bilgi sahibiyim. Faydalı dijital çözümler üretmeyi seviyorum.</p>
+
+      <h2>İletişim</h2>
+      <ul>
+        <li>Email: <a href="mailto:master_work@outlook.com">master_work@outlook.com</a></li>
+        <li>Telegram: <a href="https://t.me/shahsiya123">@shahsiya123</a></li>
+        <li>LinkedIn: <a href="https://www.linkedin.com/me">linkedin.com/me</a></li>
+        <li>GitHub: <a href="https://github.com">github.com</a> (projeler aşağıda)</li>
+      </ul>
+    </section>
+
+    <section class="projects">
+      <h2 id="projects-title">GitHub Projects</h2>
+      <ul id="repoList"></ul>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Khalid / Qirim Yurtu. All rights reserved.
+  </footer>
+
+  <script>
+    // Language switcher
+    document.getElementById('langSwitch').addEventListener('change', function () {
+      document.querySelectorAll('.lang').forEach(el => el.classList.remove('active'));
+      document.querySelector('.lang-' + this.value).classList.add('active');
+    });
+
+    // GitHub projects loader (replace with your username)
+    const githubUser = "YOUR_GITHUB_USERNAME_HERE";
+    fetch(`https://api.github.com/users/${githubUser}/repos`)
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('repoList');
+        data.slice(0, 6).forEach(repo => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${repo.html_url}" target="_blank">${repo.name}</a> - ⭐ ${repo.stargazers_count}`;
+          list.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
