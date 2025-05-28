@@ -13,8 +13,9 @@
     }
     #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     #mainContent { 
-      opacity: 0; position: relative; z-index: 5; padding: 2rem;
-      background: #f9f9f9; color: #111; height: 100vh; overflow-y: auto;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      opacity: 0; color: #f0f0f0; font-size: 1.5rem;
+      z-index: 5; text-align: center;
     }
   </style>
 </head>
@@ -32,7 +33,12 @@
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
     let countdown = 5;
+    const particles = [];
+    const letters = '01@#%QWERTYASDZXCVkırımlı';
+    const mainContent = document.getElementById('mainContent');
+    let assembling = false;
 
     const sounds = {
       tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
@@ -55,45 +61,50 @@
     function triggerExplosion() {
       countdownEl.style.display = 'none';
       sounds.boom.play();
-      startParticles();
-    }
-
-    let particles = [];
-    const letters = '01@#%QWERTYASDZXCVkırımlı';
-
-    function startParticles() {
       sounds.hum.loop = true;
       sounds.hum.play();
-      for (let i = 0; i < 300; i++) {
+      for (let i = 0; i < 400; i++) {
         particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          dx: (Math.random() - 0.5) * 5,
-          dy: (Math.random() - 0.5) * 5,
-          char: letters[Math.floor(Math.random() * letters.length)]
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          dx: (Math.random() - 0.5) * 10,
+          dy: (Math.random() - 0.5) * 10,
+          char: letters[Math.floor(Math.random() * letters.length)],
+          opacity: 1,
+          assembled: false,
+          targetX: Math.random() * canvas.width,
+          targetY: Math.random() * canvas.height
         });
       }
       animateParticles();
-      setTimeout(showMainContent, 5000);
     }
 
     function animateParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#0f0';
       ctx.font = '20px monospace';
       for (let p of particles) {
+        if (!assembling) {
+          p.x += p.dx;
+          p.y += p.dy;
+          p.opacity -= 0.01;
+          if (p.opacity < 0.6) assembling = true;
+        } else {
+          p.x += (p.targetX - p.x) * 0.05;
+          p.y += (p.targetY - p.y) * 0.05;
+          if (Math.abs(p.x - p.targetX) < 2 && Math.abs(p.y - p.targetY) < 2) p.assembled = true;
+        }
+        ctx.fillStyle = `rgba(0,255,0,${p.opacity})`;
         ctx.fillText(p.char, p.x, p.y);
-        p.x += p.dx;
-        p.y += p.dy;
       }
-      sounds.type.play();
-      requestAnimationFrame(animateParticles);
-    }
 
-    function showMainContent() {
-      document.getElementById('mainContent').style.opacity = 1;
-      canvas.style.display = 'none';
-      sounds.hum.pause();
+      if (assembling && particles.every(p => p.assembled)) {
+        setTimeout(() => {
+          mainContent.style.opacity = 1;
+          sounds.hum.pause();
+        }, 1000);
+      } else {
+        requestAnimationFrame(animateParticles);
+      }
     }
 
     doCountdown();
