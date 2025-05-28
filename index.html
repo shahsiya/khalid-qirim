@@ -10,16 +10,19 @@
   }
   html, body {
     height: 100%; background: #fff; overflow: hidden;
-    font-family: monospace;
-    color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #222;
     user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   canvas {
     display: block;
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: white;
+    background: #fff;
     z-index: 1;
   }
 </style>
@@ -50,7 +53,7 @@
   resize();
   window.addEventListener('resize', resize);
 
-  const particleSize = 18;
+  const particleSize = 20;
   const particles = [];
   let animationPhase = 'explode'; // explode -> orbit -> assemble -> done
   let frame = 0;
@@ -59,7 +62,7 @@
 
   const assembledPositions = [];
   function prepareAssembledPositions() {
-    const totalHeight = lines.length * particleSize * 1.5;
+    const totalHeight = lines.length * particleSize * 1.7;
     const startY = centerY - totalHeight / 2;
     for(let i=0; i<lines.length; i++) {
       const line = lines[i];
@@ -68,7 +71,7 @@
       for(let j=0; j<lineLength; j++) {
         assembledPositions.push({
           x: startX + j*particleSize,
-          y: startY + i*particleSize*1.5,
+          y: startY + i*particleSize*1.7,
           char: line[j]
         });
       }
@@ -107,8 +110,8 @@
 
   function animate() {
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#000';
-    ctx.font = `${particleSize}px monospace`;
+
+    ctx.font = `${particleSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 
@@ -120,8 +123,8 @@
       if(p.phase === 'explode') {
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.95;
-        p.vy *= 0.95;
+        p.vx *= 0.92;
+        p.vy *= 0.92;
 
         if(Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
           p.phase = 'orbit';
@@ -137,8 +140,8 @@
           p.phase = 'assemble';
         }
       } else if(p.phase === 'assemble') {
-        p.x = lerp(p.x, p.targetX, 0.1);
-        p.y = lerp(p.y, p.targetY, 0.1);
+        p.x = lerp(p.x, p.targetX, 0.12);
+        p.y = lerp(p.y, p.targetY, 0.12);
 
         if(Math.abs(p.x - p.targetX) < 1 && Math.abs(p.y - p.targetY) < 1) {
           p.x = p.targetX;
@@ -147,9 +150,16 @@
           allAssembled = false;
         }
       }
+
+      // тень для объёма и плавный эффект
+      ctx.shadowColor = 'rgba(0,0,0,0.15)';
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = '#222';
+
       ctx.globalAlpha = p.opacity;
       ctx.fillText(p.char, p.x, p.y);
       ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
     }
 
     if(animationPhase === 'explode' && frame > 60) {
@@ -165,9 +175,15 @@
     if(animationPhase !== 'done') {
       requestAnimationFrame(animate);
     } else {
+      // финальный рендер — буквы статичные с легкой тенью
+      ctx.clearRect(0, 0, W, H);
+      ctx.shadowColor = 'rgba(0,0,0,0.2)';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#111';
       for(let p of particles) {
         ctx.fillText(p.char, p.x, p.y);
       }
+      ctx.shadowBlur = 0;
     }
   }
 
