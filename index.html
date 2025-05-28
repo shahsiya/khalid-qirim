@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Анимация частиц с полётом по экрану</title>
+<title>Плавная анимация частиц</title>
 <style>
   * {
     margin: 0; padding: 0; box-sizing: border-box;
@@ -55,7 +55,6 @@
 
   const particleSize = 20;
   const particles = [];
-  let animationPhase = 'explode'; // explode -> fly -> assemble -> done
   let frame = 0;
 
   const centerX = W / 2;
@@ -84,8 +83,6 @@
     particles.length = 0;
     for(let i=0; i<assembledPositions.length; i++) {
       const pos = assembledPositions[i];
-      // Стартовая позиция - центр
-      // Начальная скорость для взрыва
       const angle = Math.random() * Math.PI * 2;
       const speed = 4 + Math.random()*3;
       particles.push({
@@ -94,9 +91,14 @@
         char: pos.char,
         vx: Math.cos(angle)*speed,
         vy: Math.sin(angle)*speed,
+        baseVx: 0,
+        baseVy: 0,
         targetX: pos.x,
         targetY: pos.y,
-        phase: 'explode'
+        phase: 'explode',
+        // для плавного уменьшения разброса летания
+        flyRadius: 100 + Math.random()*100,
+        flyAngle: Math.random()*Math.PI*2
       });
     }
   }
@@ -122,71 +124,61 @@
         // Взрыв — частицы улетают из центра
         p.x += p.vx;
         p.y += p.vy;
-        // Немного трения
+        // Трение
         p.vx *= 0.95;
         p.vy *= 0.95;
-
-        // Когда скорость станет маленькой — переход к полёту
         if(Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
           p.phase = 'fly';
-          // Задаём новую случайную скорость для свободного полёта
-          const angle = Math.random() * Math.PI * 2;
-          const speed = 1 + Math.random()*2;
-          p.vx = Math.cos(angle)*speed;
-          p.vy = Math.sin(angle)*speed;
+          // Начинаем свободный полёт с радиусом и углом
+          p.flyRadius = 150 + Math.random()*150;
+          p.flyAngle = Math.random()*Math.PI*2;
+          p.flySpeed = 0.015 + Math.random()*0.015;
         }
-      } else if(p.phase === 'fly') {
-        // Свободный полёт по экрану
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Отражение от краёв
-        if(p.x < 0 || p.x > W) p.vx = -p.vx;
-        if(p.y < 0 || p.y > H) p.vy = -p.vy;
-
-        // Плавное изменение направления (случайный поворот)
-        if(Math.random() < 0.02) {
-          const angle = Math.atan2(p.vy, p.vx) + (Math.random()-0.5);
-          const speed = Math.hypot(p.vx, p.vy);
-          p.vx = Math.cos(angle)*speed;
-          p.vy = Math.sin(angle)*speed;
+      } 
+      
+      if(p.phase === 'fly') {
+        // Увеличиваем счётчик для контроля времени полёта и начала сборки
+        if(frame > 300) {
+          // Постепенно уменьшаем радиус полёта, приближая частицы к цели
+          p.flyRadius = lerp(p.flyRadius, 0, 0.02);
+          // Если радиус меньше очень маленького значения, считаем, что частица достигла центра сборки
+          if(p.flyRadius < 1) {
+            // Плавно двигаемся к цели, чтобы идеально сесть
+            p.x = lerp(p.x, p.targetX, 0.1);
+            p.y = lerp(p.y, p.targetY, 0.1);
+          } else {
+            // Частица летает по кругу вокруг точки сборки с уменьшающимся радиусом
+            p.flyAngle += p.flySpeed;
+            p.x = lerp(p.x, p.targetX + p.flyRadius * Math.cos(p.flyAngle), 0.1);
+            p.y = lerp(p.y, p.targetY + p.flyRadius * Math.sin(p.flyAngle), 0.1);
+          }
+        } else {
+          // Полёт по кругу с постоянным радиусом (свободный полёт)
+          p.flyAngle += p.flySpeed;
+          p.x += Math.cos(p.flyAngle) * 1.5;
+          p.y += Math.sin(p.flyAngle) * 1.5;
         }
 
-        // Через 6 секунд (примерно 360 кадров) начинаем сборку
-        if(frame > 360) {
-          p.phase = 'assemble';
-        }
-      } else if(p.phase === 'assemble') {
-        // Сборка — плавно движемся к целевой точке
-        p.x = lerp(p.x, p.targetX, 0.12);
-        p.y = lerp(p.y, p.targetY, 0.12);
-
-        if(Math.abs(p.x - p.targetX) > 1 || Math.abs(p.y - p.targetY) > 1) {
+        // Проверяем, насколько близко частица к цели
+        if(Math.abs(p.x - p.targetX) > 2 || Math.abs(p.y - p.targetY) > 2 || p.flyRadius > 1) {
           allAssembled = false;
         }
       }
 
-      // Тень и стиль текста
+      // Стиль текста с тенью
       ctx.shadowColor = 'rgba(0,0,0,0.15)';
       ctx.shadowBlur = 3;
       ctx.fillStyle = '#222';
-
       ctx.fillText(p.char, p.x, p.y);
       ctx.shadowBlur = 0;
     }
 
-    if(animationPhase === 'explode' && frame > 60) {
-      animationPhase = 'fly';
-      frame = 0;
-    } else if(animationPhase === 'fly' && frame > 360) {
-      animationPhase = 'assemble';
-      frame = 0;
-    } else if(animationPhase === 'assemble' && allAssembled) {
-      animationPhase = 'done';
-    }
-
     if(animationPhase !== 'done') {
-      requestAnimationFrame(animate);
+      if(allAssembled && frame > 300) {
+        animationPhase = 'done';
+      } else {
+        requestAnimationFrame(animate);
+      }
     } else {
       // Финальный статичный текст
       ctx.clearRect(0, 0, W, H);
@@ -200,8 +192,9 @@
     }
   }
 
+  let animationPhase = 'explode';
   animate();
-
 </script>
+
 </body>
 </html>
