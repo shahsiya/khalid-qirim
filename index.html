@@ -82,7 +82,7 @@
           contentPiece: null
         });
       }
-      animateParticles();
+      requestAnimationFrame(animateParticles);
     }
 
     function createContentElements() {
@@ -104,8 +104,9 @@
 
       for (let i = 0; i < contentElements.length; i++) {
         for (let j = 0; j < 15; j++) {
-          const part = particles[i * 15 + j];
-          if (!part) continue;
+          const index = i * 15 + j;
+          if (index >= particles.length) continue;
+          const part = particles[index];
           part.stage = 'assemble';
           part.targetX = contentElements[i].left + Math.random() * 300;
           part.targetY = contentElements[i].top + Math.random() * 20;
@@ -113,6 +114,8 @@
         }
       }
     }
+
+    let contentTriggered = false;
 
     function animateParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -125,7 +128,8 @@
           p.x += p.dx;
           p.y += p.dy;
           p.opacity -= 0.008;
-          if (p.opacity <= 0.6 && !particles.some(pt => pt.stage === 'assemble')) {
+          if (p.opacity <= 0.6 && !contentTriggered) {
+            contentTriggered = true;
             createContentElements();
           }
         } else if (p.stage === 'assemble') {
@@ -141,10 +145,10 @@
         ctx.fillText(p.char, p.x, p.y);
       }
 
-      if (assembledCount >= contentElements.length * 15) {
-        sounds.hum.pause();
-      } else {
+      if (assembledCount < contentElements.length * 15) {
         requestAnimationFrame(animateParticles);
+      } else {
+        sounds.hum.pause();
       }
     }
 
@@ -152,3 +156,4 @@
   </script>
 </body>
 </html>
+
