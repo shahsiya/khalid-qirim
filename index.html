@@ -12,20 +12,19 @@
       font-size: 6rem; z-index: 10;
     }
     #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-    #mainContent { 
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      opacity: 0; color: #f0f0f0; font-size: 1.5rem;
-      z-index: 5; text-align: center;
+    .content-piece {
+      position: absolute;
+      font-size: 1.5rem;
+      color: #00ff99;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
     }
   </style>
 </head>
 <body>
   <div id="countdown">5</div>
   <canvas id="canvas"></canvas>
-  <div id="mainContent">
-    <h1>Добро пожаловать! / Hoş geldiniz! / Welcome!</h1>
-    <p>Я Khalid, также известен как Qirim Yurtu. Здесь вы найдёте информацию обо мне, моих навыках, проектах и контактах.</p>
-  </div>
 
   <script>
     const countdownEl = document.getElementById('countdown');
@@ -37,8 +36,14 @@
     let countdown = 5;
     const particles = [];
     const letters = '01@#%QWERTYASDZXCVkırımlı';
-    const mainContent = document.getElementById('mainContent');
-    let assembling = false;
+    const content = [
+      'Добро пожаловать! / Hoş geldiniz! / Welcome!',
+      'Я Khalid, также известен как Qirim Yurtu.',
+      'Frontend-разработка, Firebase, WordPress, Tilda.',
+      'Node.js, парсинг, автоматизация.',
+      'Контакты: @shahsiya123 | master_work@outlook.com'
+    ];
+    const contentElements = [];
 
     const sounds = {
       tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
@@ -63,45 +68,81 @@
       sounds.boom.play();
       sounds.hum.loop = true;
       sounds.hum.play();
-      for (let i = 0; i < 400; i++) {
+      for (let i = 0; i < 600; i++) {
         particles.push({
           x: canvas.width / 2,
           y: canvas.height / 2,
-          dx: (Math.random() - 0.5) * 10,
-          dy: (Math.random() - 0.5) * 10,
+          dx: (Math.random() - 0.5) * 12,
+          dy: (Math.random() - 0.5) * 12,
           char: letters[Math.floor(Math.random() * letters.length)],
           opacity: 1,
-          assembled: false,
-          targetX: Math.random() * canvas.width,
-          targetY: Math.random() * canvas.height
+          stage: 'scatter',
+          targetX: null,
+          targetY: null,
+          contentPiece: null
         });
       }
       animateParticles();
     }
 
+    function createContentElements() {
+      const spacing = 50;
+      content.forEach((text, i) => {
+        const el = document.createElement('div');
+        el.classList.add('content-piece');
+        el.textContent = text;
+        document.body.appendChild(el);
+
+        const left = window.innerWidth / 2 - 300;
+        const top = window.innerHeight / 2 - (content.length / 2 * spacing) + i * spacing;
+
+        el.style.left = `${left}px`;
+        el.style.top = `${top}px`;
+
+        contentElements.push({ el, left, top });
+      });
+
+      for (let i = 0; i < contentElements.length; i++) {
+        for (let j = 0; j < 15; j++) {
+          const part = particles[i * 15 + j];
+          if (!part) continue;
+          part.stage = 'assemble';
+          part.targetX = contentElements[i].left + Math.random() * 300;
+          part.targetY = contentElements[i].top + Math.random() * 20;
+          part.contentPiece = contentElements[i].el;
+        }
+      }
+    }
+
     function animateParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = '20px monospace';
+
+      let assembledCount = 0;
+
       for (let p of particles) {
-        if (!assembling) {
+        if (p.stage === 'scatter') {
           p.x += p.dx;
           p.y += p.dy;
-          p.opacity -= 0.01;
-          if (p.opacity < 0.6) assembling = true;
-        } else {
+          p.opacity -= 0.008;
+          if (p.opacity <= 0.6 && !particles.some(pt => pt.stage === 'assemble')) {
+            createContentElements();
+          }
+        } else if (p.stage === 'assemble') {
           p.x += (p.targetX - p.x) * 0.05;
           p.y += (p.targetY - p.y) * 0.05;
-          if (Math.abs(p.x - p.targetX) < 2 && Math.abs(p.y - p.targetY) < 2) p.assembled = true;
+          if (Math.abs(p.x - p.targetX) < 2 && Math.abs(p.y - p.targetY) < 2) {
+            p.stage = 'done';
+            if (p.contentPiece) p.contentPiece.style.opacity = 1;
+            assembledCount++;
+          }
         }
         ctx.fillStyle = `rgba(0,255,0,${p.opacity})`;
         ctx.fillText(p.char, p.x, p.y);
       }
 
-      if (assembling && particles.every(p => p.assembled)) {
-        setTimeout(() => {
-          mainContent.style.opacity = 1;
-          sounds.hum.pause();
-        }, 1000);
+      if (assembledCount >= contentElements.length * 15) {
+        sounds.hum.pause();
       } else {
         requestAnimationFrame(animateParticles);
       }
