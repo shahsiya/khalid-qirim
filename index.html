@@ -24,22 +24,40 @@
       font-size: 2rem;
       pointer-events: auto;
     }
+    #replayButton {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    #replayButton.visible {
+      opacity: 1;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-yzS8A7tulq7RyzpuuO3u3j1k6v9z0i2JSjxq3HqF4m/5HJqDd0wL1kTnHXrVKPc+SkNhEMBB28U1flXGvYwtGw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
   <div id="countdown">5</div>
   <canvas id="canvas"></canvas>
+  <button id="replayButton">Смотреть снова</button>
 
   <script>
     const countdownEl = document.getElementById('countdown');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const replayBtn = document.getElementById('replayButton');
 
-    let countdown = 5;
-    const particles = [];
+    let countdown, particles, contentElements, contentTriggered;
+
     const letters = '01@#%QWERTYASDZXCVkırımlı';
     const content = [
       'Добро пожаловать! / Hoş geldiniz! / Welcome!',
@@ -48,13 +66,31 @@
       'Node.js, парсинг, автоматизация.',
       '<a href="https://t.me/shahsiya123" class="icon"><i class="fab fa-telegram"></i></a> <a href="mailto:master_work@outlook.com" class="icon"><i class="fas fa-envelope"></i></a>'
     ];
-    const contentElements = [];
 
     const sounds = {
       tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
       boom: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-small-explosion-1688.mp3'),
       hum: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-space-ambience-1739.mp3')
     };
+
+    function resetScene() {
+      countdown = 5;
+      particles = [];
+      contentElements = [];
+      contentTriggered = false;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      countdownEl.textContent = countdown;
+      countdownEl.style.display = 'block';
+
+      document.querySelectorAll('.content-piece').forEach(el => el.remove());
+      replayBtn.classList.remove('visible');
+
+      sounds.hum.pause();
+      doCountdown();
+    }
 
     function doCountdown() {
       if (countdown > 0) {
@@ -119,8 +155,6 @@
       }
     }
 
-    let contentTriggered = false;
-
     function animateParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = '20px monospace';
@@ -153,10 +187,17 @@
         requestAnimationFrame(animateParticles);
       } else {
         sounds.hum.pause();
+        replayBtn.classList.add('visible');
       }
     }
 
-    doCountdown();
+    replayBtn.addEventListener('click', resetScene);
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    resetScene();
   </script>
 </body>
 </html>
