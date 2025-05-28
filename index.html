@@ -1,170 +1,200 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Animated Particles Text</title>
+  <title>Qirim Yurtu</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #111;
-      font-family: 'Poppins', sans-serif;
+      height: 100%;
+      background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     canvas {
-      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    #icons {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1s ease-in-out 0.5s;
+    }
+
+    #icons.visible {
+      opacity: 1;
+    }
+
+    #icons img {
+      margin: 0 10px;
+      width: 40px;
+      height: 40px;
+      transition: transform 0.3s ease;
+    }
+
+    #icons img:hover {
+      transform: scale(1.2);
     }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
+  <div id="icons">
+    <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
+    <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="HTML5" />
+    <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
+  </div>
 
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-
-    let W = window.innerWidth;
-    let H = window.innerHeight;
+    let W, H;
 
     const lines = [
-      'Твори',
-      'Созидай',
-      'Вдохновляй'
+      "Добро пожаловать! / Hoş geldiniz! / Welcome!",
+      "Я Khalid, также известен как Qirim Yurtu.",
+      "Frontend-разработка, Firebase, WordPress, Tilda.",
+      "Node.js, парсинг, автоматизация."
     ];
 
-    const fontName = 'Poppins, sans-serif';
-    let particleSize = 28;
-    const gap = 2;
-    const particles = [];
-    let assembledPositions = [];
-
-    function getAdaptiveParticleSize(lines, maxWidth) {
-      const ctxTest = document.createElement('canvas').getContext('2d');
-      const baseSize = 32;
-
-      for (let size = baseSize; size >= 14; size--) {
-        ctxTest.font = `bold ${size}px ${fontName}`;
-        const widestLine = lines.reduce((max, line) => {
-          const width = ctxTest.measureText(line).width;
-          return width > max ? width : max;
-        }, 0);
-
-        if (widestLine < maxWidth * 0.9) return size;
-      }
-
-      return 14;
-    }
-
-    function setupCanvas() {
+    function resize() {
       W = window.innerWidth;
       H = window.innerHeight;
-
-      particleSize = getAdaptiveParticleSize(lines, W);
-
-      canvas.width = W * dpr;
-      canvas.height = H * dpr;
-      canvas.style.width = W + 'px';
-      canvas.style.height = H + 'px';
-
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-      ctx.imageSmoothingEnabled = false;
-
-      prepareAssembledPositions();
-      createParticles();
+      canvas.width = W;
+      canvas.height = H;
     }
+    resize();
+    window.addEventListener('resize', resize);
 
+    const particleSize = 20;
+    const particles = [];
+    let frame = 0;
+    let animationPhase = 'explode';
+
+    const centerX = () => W / 2;
+    const centerY = () => H / 2;
+
+    const assembledPositions = [];
     function prepareAssembledPositions() {
-      assembledPositions = [];
-
-      const offscreenCanvas = document.createElement('canvas');
-      const offscreenCtx = offscreenCanvas.getContext('2d');
-
-      offscreenCanvas.width = W;
-      offscreenCanvas.height = H;
-
-      offscreenCtx.clearRect(0, 0, W, H);
-      offscreenCtx.fillStyle = '#fff';
-      offscreenCtx.textAlign = 'center';
-      offscreenCtx.textBaseline = 'middle';
-      offscreenCtx.font = `bold ${particleSize}px ${fontName}`;
-
-      const lineHeight = particleSize * 1.4;
-      const totalHeight = lines.length * lineHeight;
-      const startY = (H - totalHeight) / 2 + lineHeight / 2;
-
-      lines.forEach((line, index) => {
-        const y = startY + index * lineHeight;
-        offscreenCtx.fillText(line, W / 2, y);
-      });
-
-      const imageData = offscreenCtx.getImageData(0, 0, W, H).data;
-
-      for (let y = 0; y < H; y += gap) {
-        for (let x = 0; x < W; x += gap) {
-          const index = (y * W + x) * 4;
-          const alpha = imageData[index + 3];
-
-          if (alpha > 128) {
-            assembledPositions.push({ x, y });
-          }
+      const totalHeight = lines.length * particleSize * 1.7;
+      const startY = centerY() - totalHeight / 2;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const lineLength = line.length;
+        const startX = centerX() - (lineLength * particleSize) / 2;
+        for (let j = 0; j < lineLength; j++) {
+          assembledPositions.push({
+            x: startX + j * particleSize,
+            y: startY + i * particleSize * 1.7,
+            char: line[j]
+          });
         }
       }
     }
+    prepareAssembledPositions();
 
     function createParticles() {
       particles.length = 0;
-
       for (let i = 0; i < assembledPositions.length; i++) {
         const pos = assembledPositions[i];
-        const angle = Math.random() * 2 * Math.PI;
-        const radius = Math.random() * 300 + 100;
-
-        const particle = {
-          x: pos.x + Math.cos(angle) * radius,
-          y: pos.y + Math.sin(angle) * radius,
-          tx: pos.x,
-          ty: pos.y,
-          size: gap,
-          color: `hsl(${Math.random() * 360}, 100%, 70%)`,
-          vx: 0,
-          vy: 0
-        };
-
-        particles.push(particle);
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 3 + Math.random() * 2;
+        particles.push({
+          x: centerX(),
+          y: centerY(),
+          char: pos.char,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          targetX: pos.x,
+          targetY: pos.y,
+          phase: 'explode',
+          flyRadius: 100 + Math.random() * 100,
+          flyAngle: Math.random() * Math.PI * 2,
+          flySpeed: 0.01 + Math.random() * 0.015,
+          opacity: 0
+        });
       }
+    }
+    createParticles();
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
     }
 
     function animate() {
       ctx.clearRect(0, 0, W, H);
+      ctx.font = `${particleSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
+      frame++;
 
-        const dx = p.tx - p.x;
-        const dy = p.ty - p.y;
-        p.vx += dx * 0.01;
-        p.vy += dy * 0.01;
-        p.vx *= 0.92;
-        p.vy *= 0.92;
-        p.x += p.vx;
-        p.y += p.vy;
+      let allAssembled = true;
 
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
+      for (let p of particles) {
+        if (p.phase === 'explode') {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.93;
+          p.vy *= 0.93;
+          p.opacity = Math.min(1, p.opacity + 0.03);
+          if (Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
+            p.phase = 'fly';
+          }
+        }
+
+        if (p.phase === 'fly') {
+          if (frame > 200) {
+            p.flyRadius = lerp(p.flyRadius, 0, 0.04);
+            if (p.flyRadius < 1) {
+              p.x = lerp(p.x, p.targetX, 0.12);
+              p.y = lerp(p.y, p.targetY, 0.12);
+            } else {
+              p.flyAngle += p.flySpeed;
+              p.x = lerp(p.x, p.targetX + p.flyRadius * Math.cos(p.flyAngle), 0.08);
+              p.y = lerp(p.y, p.targetY + p.flyRadius * Math.sin(p.flyAngle), 0.08);
+            }
+          } else {
+            p.flyAngle += p.flySpeed;
+            p.x += Math.cos(p.flyAngle) * 1.2;
+            p.y += Math.sin(p.flyAngle) * 1.2;
+          }
+
+          if (Math.abs(p.x - p.targetX) > 1.5 || Math.abs(p.y - p.targetY) > 1.5 || p.flyRadius > 1) {
+            allAssembled = false;
+          }
+        }
+
+        ctx.globalAlpha = p.opacity;
+        ctx.shadowColor = 'rgba(0,0,0,0.15)';
+        ctx.shadowBlur = animationPhase === 'done' ? 6 : 3;
+        ctx.fillStyle = '#222';
+        ctx.fillText(p.char, p.x, p.y);
       }
 
-      requestAnimationFrame(animate);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+
+      if (animationPhase !== 'done') {
+        if (allAssembled && frame > 200) {
+          animationPhase = 'done';
+          document.getElementById('icons').classList.add('visible');
+        } else {
+          requestAnimationFrame(animate);
+        }
+      }
     }
 
-    window.addEventListener('resize', () => {
-      setupCanvas();
-    });
-
-    setupCanvas();
     animate();
   </script>
 </body>
