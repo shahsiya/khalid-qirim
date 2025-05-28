@@ -1,99 +1,73 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Плавная анимация частиц с иконками</title>
-<style>
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
-  html, body {
-    height: 100%; background: #fff; overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #222;
-    user-select: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-  }
-  canvas {
-    display: block;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #fff;
-    z-index: 1;
-  }
-  #icons {
-    position: fixed;
-    bottom: 40px;
-    display: flex;
-    gap: 40px;
-    z-index: 10;
-    opacity: 0;
-    animation: fadeInIcons 1.5s forwards 2s; /* плавное появление через 2 секунды */
-  }
-  @keyframes fadeInIcons {
-    to { opacity: 1; }
-  }
-  #icons a {
-    text-decoration: none;
-    color: #222;
-    font-size: 0;
-    width: 48px;
-    height: 48px;
-    display: inline-block;
-    filter: invert(0%);
-    transition: filter 0.3s ease;
-    outline-offset: 4px; /* для лучшего фокуса клавиатуры */
-  }
-  #icons a:hover,
-  #icons a:focus {
-    filter: invert(40%);
-    outline: 2px solid #0088cc;
-    outline-offset: 2px;
-  }
-  /* Телеграм иконка SVG */
-  #telegram-icon svg, #email-icon svg {
-    width: 48px;
-    height: 48px;
-    display: block;
-    fill: #222;
-  }
-
-  /* Адаптив для маленьких экранов */
-  @media (max-width: 480px) {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Плавная анимация частиц с иконками</title>
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    html, body {
+      height: 100%; background: #fff; overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #222;
+      user-select: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff;
+      z-index: 1;
+    }
     #icons {
-      gap: 20px;
-      bottom: 20px;
+      position: fixed;
+      bottom: 40px;
+      display: flex;
+      gap: 40px;
+      z-index: 10;
     }
     #icons a {
-      width: 36px;
-      height: 36px;
+      text-decoration: none;
+      color: #222;
+      font-size: 0;
+      width: 48px;
+      height: 48px;
+      display: inline-block;
+      filter: invert(0%);
+      transition: filter 0.3s ease;
+    }
+    #icons a:hover {
+      filter: invert(40%);
     }
     #telegram-icon svg, #email-icon svg {
-      width: 36px;
-      height: 36px;
+      width: 48px;
+      height: 48px;
+      display: block;
+      fill: #222;
     }
-  }
-</style>
+  </style>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
 
 <div id="icons">
-  <a href="https://t.me/shahsiya123" target="_blank" id="telegram-icon" aria-label="Telegram" tabindex="0">
-    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" >
+  <a href="https://t.me/shahsiya123" target="_blank" id="telegram-icon" aria-label="Telegram">
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
       <circle cx="120" cy="120" r="120" fill="#fff"/>
       <path d="M97.7 164.6c-3.6 0-4.7-1.6-6.6-5.6l-18.4-37.6-37.4-12.1c-7.9-2.6-8-7.9 1.6-11.7l71.2-27.5c6.7-2.6 12.7 1.5 10.3 11l-15 67.2c-1.4 6.1-3.3 7.8-5.7 7.8z" fill="#0088cc"/>
       <path d="M122.2 122.5l48.8-41.4c4.6-3.6 8.8-1.7 5.7 5.7l-38.1 59.7c-3.6 5.6-6.6 7.9-13.7 4.7l-18.3-13.7z" fill="#00b2ff"/>
     </svg>
   </a>
 
-  <a href="mailto:master_work@outlook.com" id="email-icon" aria-label="Email" tabindex="0">
+  <a href="mailto:master_work@outlook.com" id="email-icon" aria-label="Email">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path fill="#222" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
     </svg>
@@ -104,7 +78,6 @@
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   let W, H;
-  let centerX, centerY;
 
   const lines = [
     "Добро пожаловать! / Hoş geldiniz! / Welcome!",
@@ -113,108 +86,95 @@
     "Node.js, парсинг, автоматизация."
   ];
 
-  const particleSize = 20;
-  const particles = [];
-  let frame = 0;
-
-  const assembledPositions = [];
-
-  // Обновляем размеры, центр и пересоздаем частицы
   function resize() {
     W = window.innerWidth;
     H = window.innerHeight;
     canvas.width = W;
     canvas.height = H;
-
-    centerX = W / 2;
-    centerY = H / 2;
-
-    assembledPositions.length = 0;  // Очистка перед заполнением
-    prepareAssembledPositions();
-
-    createParticles();
   }
-  window.addEventListener('resize', resize);
   resize();
+  window.addEventListener('resize', resize);
+
+  const particleSize = 20;
+  const particles = [];
+  let frame = 0;
+  const centerX = () => window.innerWidth / 2;
+  const centerY = () => window.innerHeight / 2;
+  const assembledPositions = [];
 
   function prepareAssembledPositions() {
-    assembledPositions.length = 0; // очистка
-
     const totalHeight = lines.length * particleSize * 1.7;
-    const startY = centerY - totalHeight / 2;
-    for(let i=0; i<lines.length; i++) {
+    const startY = centerY() - totalHeight / 2;
+    for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const lineLength = line.length;
-      const startX = centerX - (lineLength * particleSize)/2;
-      for(let j=0; j<lineLength; j++) {
+      const startX = centerX() - (lineLength * particleSize) / 2;
+      for (let j = 0; j < lineLength; j++) {
         assembledPositions.push({
-          x: startX + j*particleSize,
-          y: startY + i*particleSize*1.7,
+          x: startX + j * particleSize,
+          y: startY + i * particleSize * 1.7,
           char: line[j]
         });
       }
     }
   }
+  prepareAssembledPositions();
 
   function createParticles() {
     particles.length = 0;
-    for(let i=0; i<assembledPositions.length; i++) {
+    for (let i = 0; i < assembledPositions.length; i++) {
       const pos = assembledPositions[i];
       const angle = Math.random() * Math.PI * 2;
-      const speed = 4 + Math.random()*3;
+      const speed = 4 + Math.random() * 3;
       particles.push({
-        x: centerX,
-        y: centerY,
+        x: centerX(),
+        y: centerY(),
         char: pos.char,
-        vx: Math.cos(angle)*speed,
-        vy: Math.sin(angle)*speed,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
         targetX: pos.x,
         targetY: pos.y,
         phase: 'explode',
-        flyRadius: 100 + Math.random()*100,
-        flyAngle: Math.random()*Math.PI*2,
-        flySpeed: 0
+        flyRadius: 100 + Math.random() * 100,
+        flyAngle: Math.random() * Math.PI * 2,
+        flySpeed: 0.015 + Math.random() * 0.015
       });
     }
-    frame = 0;
-    animationPhase = 'explode';
   }
+  createParticles();
 
   function lerp(a, b, t) {
-    return a + (b - a)*t;
+    return a + (b - a) * t;
   }
 
   let animationPhase = 'explode';
 
   function animate() {
     ctx.clearRect(0, 0, W, H);
-
     ctx.font = `${particleSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 
     frame++;
-
     let allAssembled = true;
 
-    for(let p of particles) {
-      if(p.phase === 'explode') {
+    for (let p of particles) {
+      if (p.phase === 'explode') {
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.95;
         p.vy *= 0.95;
-        if(Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
+        if (Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
           p.phase = 'fly';
-          p.flyRadius = 150 + Math.random()*150;
-          p.flyAngle = Math.random()*Math.PI*2;
-          p.flySpeed = 0.015 + Math.random()*0.015;
+        } else {
+          allAssembled = false;
         }
-      } 
-      
-      if(p.phase === 'fly') {
-        if(frame > 300) {
+      }
+
+      if (p.phase === 'fly') {
+        if (frame > 300) {
           p.flyRadius = lerp(p.flyRadius, 0, 0.02);
-          if(p.flyRadius < 1) {
+          if (p.flyRadius < 1) {
             p.x = lerp(p.x, p.targetX, 0.1);
             p.y = lerp(p.y, p.targetY, 0.1);
           } else {
@@ -227,33 +187,34 @@
           p.x += Math.cos(p.flyAngle) * 1.5;
           p.y += Math.sin(p.flyAngle) * 1.5;
         }
-        if(Math.abs(p.x - p.targetX) > 2 || Math.abs(p.y - p.targetY) > 2 || p.flyRadius > 1) {
+
+        if (Math.abs(p.x - p.targetX) > 2 || Math.abs(p.y - p.targetY) > 2 || p.flyRadius > 1) {
           allAssembled = false;
         }
       }
 
-      ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,0.15)';
       ctx.shadowBlur = 3;
       ctx.fillStyle = '#222';
       ctx.fillText(p.char, p.x, p.y);
-      ctx.restore();
+      ctx.shadowBlur = 0;
     }
 
-    if(animationPhase !== 'done') {
-      if(allAssembled && frame > 300) {
+    if (animationPhase !== 'done') {
+      if (allAssembled && frame > 300) {
         animationPhase = 'done';
+      } else {
+        requestAnimationFrame(animate);
       }
-      requestAnimationFrame(animate);
     } else {
-      // Чтобы частицы не стояли совсем неподвижно,
-      // можно добавить легкое пульсирование на месте
-      for(let p of particles) {
-        p.x += Math.sin(frame * 0.01 + p.x)*0.1;
-        p.y += Math.cos(frame * 0.01 + p.y)*0.1;
+      ctx.clearRect(0, 0, W, H);
+      ctx.shadowColor = 'rgba(0,0,0,0.2)';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#111';
+      for (let p of particles) {
+        ctx.fillText(p.char, p.x, p.y);
       }
-      frame++;
-      requestAnimationFrame(animate);
+      ctx.shadowBlur = 0;
     }
   }
 
@@ -262,4 +223,3 @@
 
 </body>
 </html>
-
