@@ -55,10 +55,25 @@
     <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
   </div>
 
- <script>
+<script>
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   let W, H;
+
+  function setupCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // сброс трансформаций
+    ctx.scale(dpr, dpr);
+    ctx.imageSmoothingEnabled = false;
+  }
+  setupCanvas();
+  window.addEventListener('resize', setupCanvas);
 
   const lines = [
     "Добро пожаловать! / Hoş geldiniz! / Welcome!",
@@ -67,16 +82,7 @@
     "Node.js, парсинг, автоматизация."
   ];
 
-  function resize() {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.width = W;
-    canvas.height = H;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const particleSize = 28; // увеличенный размер
+  const particleSize = 30; // размер шрифта чуть больше для четкости
   const particles = [];
   let frame = 0;
   let animationPhase = 'explode';
@@ -86,6 +92,7 @@
 
   const assembledPositions = [];
   function prepareAssembledPositions() {
+    assembledPositions.length = 0;
     const totalHeight = lines.length * particleSize * 1.8;
     const startY = centerY() - totalHeight / 2;
     for (let i = 0; i < lines.length; i++) {
@@ -133,13 +140,12 @@
 
   function animate() {
     ctx.clearRect(0, 0, W, H);
-    ctx.font = `bold ${particleSize}px 'Segoe UI', sans-serif`;
+    ctx.font = `bold ${particleSize}px 'Segoe UI', Tahoma, Geneva, sans-serif`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 
-    const gradient = ctx.createLinearGradient(0, 0, W, H);
-    gradient.addColorStop(0, '#343a40');
-    gradient.addColorStop(1, '#007bff');
+    // Простой однотонный цвет — контрастный и четкий
+    const textColor = '#222';
 
     frame++;
 
@@ -180,9 +186,9 @@
       }
 
       ctx.globalAlpha = p.opacity;
-      ctx.fillStyle = gradient;
-      ctx.shadowColor = 'rgba(0,0,0,0.3)';
-      ctx.shadowBlur = animationPhase === 'done' ? 10 : 4;
+      ctx.fillStyle = textColor;
+      ctx.shadowColor = 'rgba(0,0,0,0.15)';
+      ctx.shadowBlur = 1;  // минимальная тень для легкой глубины
       ctx.fillText(p.char, p.x, p.y);
     }
 
@@ -201,6 +207,7 @@
 
   animate();
 </script>
+
 
 </body>
 </html>
