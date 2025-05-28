@@ -225,22 +225,20 @@ html, body {
       return a + (b - a) * t;
     }
 
-    function drawTextWithEffects(p, x, y) {
-      ctx.shadowColor = 'rgba(0, 140, 255, 0.6)';
-      ctx.shadowBlur = 8;
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(0, 100, 180, 0.8)';
-      ctx.strokeText(p.char, x, y);
+   function drawTextWithEffects(p, x, y) {
+  // Светящееся золотое свечение
+  ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+  ctx.shadowBlur = 12;
+  
+  // Золотая обводка
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#FFD700';
+  ctx.strokeText(p.char, x, y);
 
-      const grad = ctx.createLinearGradient(x, y - particleSize / 2, x, y + particleSize / 2);
-      grad.addColorStop(0, '#00c6ff');
-      grad.addColorStop(1, '#0072ff');
-
-      ctx.fillStyle = grad;
-      ctx.shadowColor = 'rgba(0,0,0,0.1)';
-      ctx.shadowBlur = 1;
-      ctx.fillText(p.char, x, y);
-    }
+  // Чёрное заполнение
+  ctx.fillStyle = '#000000';
+  ctx.fillText(p.char, x, y);
+}
 
     function animate() {
       ctx.clearRect(0, 0, W, H);
