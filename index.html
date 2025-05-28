@@ -131,14 +131,14 @@ html, body {
 
     function getMaxFittingParticleSize() {
       const longestLine = lines.reduce((a, b) => (a.length > b.length ? a : b));
-      const padding = 40;
+      const padding = 60;
       const availableWidth = W - padding;
 
       let size = 32;
       ctx.font = `bold ${size}px 'Poppins', sans-serif`;
       let textWidth = ctx.measureText(longestLine).width;
 
-      while (textWidth > availableWidth && size > 5) {
+      while (textWidth > availableWidth && size > 10) {
         size -= 1;
         ctx.font = `bold ${size}px 'Poppins', sans-serif`;
         textWidth = ctx.measureText(longestLine).width;
