@@ -5,135 +5,98 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Khalid / Qirim Yurtu</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #fdfdfd;
-      color: #222;
-      line-height: 1.6;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #000; overflow: hidden; font-family: monospace; color: white; }
+    #countdown { 
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 6rem; z-index: 10;
     }
-    header {
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      border-bottom: 1px solid #eaeaea;
-    }
-    nav select {
-      padding: 0.3rem;
-      font-size: 1rem;
-    }
-    main {
-      padding: 2rem;
-      max-width: 800px;
-      margin: auto;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-    .lang {
-      display: none;
-    }
-    .lang.active {
-      display: block;
-    }
-    .projects {
-      margin-top: 2rem;
-    }
-    .projects ul {
-      padding-left: 1rem;
-    }
-    footer {
-      text-align: center;
-      padding: 2rem;
-      font-size: 0.9rem;
-      color: #666;
+    #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    #mainContent { 
+      opacity: 0; position: relative; z-index: 5; padding: 2rem;
+      background: #f9f9f9; color: #111; height: 100vh; overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h2>Khalid / Qirim Yurtu</h2>
-    <nav>
-      <select id="langSwitch">
-        <option value="en">EN</option>
-        <option value="ru">RU</option>
-        <option value="tr">TR</option>
-      </select>
-    </nav>
-  </header>
-
-  <main>
-    <section class="lang lang-en active">
-      <h1>About Me</h1>
-      <p>Hi, I'm Khalid — an aspiring full-stack developer focused on automation, data parsing, and digital integrations. I'm skilled in Firebase, Node.js, WordPress, Tilda, Google Apps Script and GitHub. Passionate about creating digital tools that help people and businesses.</p>
-
-      <h2>Contacts</h2>
-      <ul>
-        <li>Email: <a href="mailto:master_work@outlook.com">master_work@outlook.com</a></li>
-        <li>Telegram: <a href="https://t.me/shahsiya123">@shahsiya123</a></li>
-        <li>LinkedIn: <a href="https://www.linkedin.com/me">linkedin.com/me</a></li>
-        <li>GitHub: <a href="https://github.com">github.com</a> (auto projects below)</li>
-      </ul>
-    </section>
-
-    <section class="lang lang-ru">
-      <h1>Обо мне</h1>
-      <p>Привет! Я Халид — начинающий full-stack разработчик, специализируюсь на автоматизации, парсерах и цифровой интеграции. Знаю Firebase, Node.js, WordPress, Tilda, Google Apps Script и GitHub. Хочу создавать полезные цифровые инструменты для людей и бизнеса.</p>
-
-      <h2>Контакты</h2>
-      <ul>
-        <li>Email: <a href="mailto:master_work@outlook.com">master_work@outlook.com</a></li>
-        <li>Telegram: <a href="https://t.me/shahsiya123">@shahsiya123</a></li>
-        <li>LinkedIn: <a href="https://www.linkedin.com/me">linkedin.com/me</a></li>
-        <li>GitHub: <a href="https://github.com">github.com</a> (проекты ниже)</li>
-      </ul>
-    </section>
-
-    <section class="lang lang-tr">
-      <h1>Hakkımda</h1>
-      <p>Merhaba! Ben Khalid — otomasyon, veri toplama ve dijital entegrasyonlar üzerine çalışan genç bir full-stack geliştiriciyim. Firebase, Node.js, WordPress, Tilda, Google Apps Script ve GitHub konularında bilgi sahibiyim. Faydalı dijital çözümler üretmeyi seviyorum.</p>
-
-      <h2>İletişim</h2>
-      <ul>
-        <li>Email: <a href="mailto:master_work@outlook.com">master_work@outlook.com</a></li>
-        <li>Telegram: <a href="https://t.me/shahsiya123">@shahsiya123</a></li>
-        <li>LinkedIn: <a href="https://www.linkedin.com/me">linkedin.com/me</a></li>
-        <li>GitHub: <a href="https://github.com">github.com</a> (projeler aşağıda)</li>
-      </ul>
-    </section>
-
-    <section class="projects">
-      <h2 id="projects-title">GitHub Projects</h2>
-      <ul id="repoList"></ul>
-    </section>
-  </main>
-
-  <footer>
-    &copy; 2025 Khalid / Qirim Yurtu. All rights reserved.
-  </footer>
+  <div id="countdown">5</div>
+  <canvas id="canvas"></canvas>
+  <div id="mainContent">
+    <h1>Добро пожаловать! / Hoş geldiniz! / Welcome!</h1>
+    <p>Я Khalid, также известен как Qirim Yurtu. Здесь вы найдёте информацию обо мне, моих навыках, проектах и контактах.</p>
+  </div>
 
   <script>
-    // Language switcher
-    document.getElementById('langSwitch').addEventListener('change', function () {
-      document.querySelectorAll('.lang').forEach(el => el.classList.remove('active'));
-      document.querySelector('.lang-' + this.value).classList.add('active');
-    });
+    const countdownEl = document.getElementById('countdown');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    let countdown = 5;
 
-    // GitHub projects loader (replace with your username)
-    const githubUser = "YOUR_GITHUB_USERNAME_HERE";
-    fetch(`https://api.github.com/users/${githubUser}/repos`)
-      .then(res => res.json())
-      .then(data => {
-        const list = document.getElementById('repoList');
-        data.slice(0, 6).forEach(repo => {
-          const li = document.createElement('li');
-          li.innerHTML = `<a href="${repo.html_url}" target="_blank">${repo.name}</a> - ⭐ ${repo.stargazers_count}`;
-          list.appendChild(li);
+    const sounds = {
+      tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
+      boom: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-small-explosion-1688.mp3'),
+      type: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-typewriter-key-1123.mp3'),
+      hum: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-space-ambience-1739.mp3')
+    };
+
+    function doCountdown() {
+      if (countdown > 0) {
+        countdownEl.textContent = countdown;
+        sounds.tick.play();
+        countdown--;
+        setTimeout(doCountdown, 1000);
+      } else {
+        triggerExplosion();
+      }
+    }
+
+    function triggerExplosion() {
+      countdownEl.style.display = 'none';
+      sounds.boom.play();
+      startParticles();
+    }
+
+    let particles = [];
+    const letters = '01@#%QWERTYASDZXCVkırımlı';
+
+    function startParticles() {
+      sounds.hum.loop = true;
+      sounds.hum.play();
+      for (let i = 0; i < 300; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          dx: (Math.random() - 0.5) * 5,
+          dy: (Math.random() - 0.5) * 5,
+          char: letters[Math.floor(Math.random() * letters.length)]
         });
-      });
+      }
+      animateParticles();
+      setTimeout(showMainContent, 5000);
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0f0';
+      ctx.font = '20px monospace';
+      for (let p of particles) {
+        ctx.fillText(p.char, p.x, p.y);
+        p.x += p.dx;
+        p.y += p.dy;
+      }
+      sounds.type.play();
+      requestAnimationFrame(animateParticles);
+    }
+
+    function showMainContent() {
+      document.getElementById('mainContent').style.opacity = 1;
+      canvas.style.display = 'none';
+      sounds.hum.pause();
+    }
+
+    doCountdown();
   </script>
 </body>
 </html>
