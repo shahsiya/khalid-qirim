@@ -28,13 +28,15 @@
     H = window.innerHeight;
 
     // Адаптивный размер шрифта и частицы в зависимости от ширины
-    if (W < 400) {
-      particleSize = 20; // для маленьких телефонов
-    } else if (W < 768) {
-      particleSize = 28; // для планшетов и небольших экранов
-    } else {
-      particleSize = 32; // для десктопов
-    }
+  if (W < 400) {
+  particleSize = 14; // маленькие телефоны
+} else if (W < 768) {
+  particleSize = 20; // планшеты
+} else if (W < 1200) {
+  particleSize = 28; // ноутбуки
+} else {
+  particleSize = 32; // большие экраны
+}
 
     canvas.width = W * dpr;
     canvas.height = H * dpr;
