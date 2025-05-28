@@ -1,178 +1,275 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Khalid / Qirim Yurtu</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; background: #fff; overflow: hidden; font-family: monospace; color: black; }
-    #countdown {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 6rem;
-      z-index: 10;
-    }
-    #canvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-    .content-piece {
-      position: absolute;
-      font-size: 1.5rem;
-      color: #000;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 5;
-    }
-    .icon {
-      font-size: 2rem;
-      pointer-events: auto;
-    }
-  </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Плавная анимация частиц с иконками</title>
+<style>
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+  html, body {
+    height: 100%; background: #fff; overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #222;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  canvas {
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #fff;
+    z-index: 1;
+  }
+  #icons {
+    position: fixed;
+    bottom: 40px;
+    display: flex;
+    gap: 40px;
+    z-index: 10;
+  }
+  #icons a {
+    text-decoration: none;
+    color: #222;
+    font-size: 0;
+    width: 48px;
+    height: 48px;
+    display: inline-block;
+    filter: invert(0%);
+    transition: filter 0.3s ease;
+    position: absolute; /* для анимации по экрану */
+    cursor: pointer;
+  }
+  #icons a:hover {
+    filter: invert(40%);
+  }
+  /* Телеграм иконка SVG */
+  #telegram-icon svg, #email-icon svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+    fill: #222;
+  }
+</style>
 </head>
 <body>
-  <div id="countdown">5</div>
-  <canvas id="canvas"></canvas>
 
-  <script>
-    const countdownEl = document.getElementById('countdown');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+<canvas id="canvas"></canvas>
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+<div id="icons">
+  <a href="https://t.me/shahsiya123" target="_blank" id="telegram-icon" aria-label="Telegram">
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" >
+      <circle cx="120" cy="120" r="120" fill="#fff"/>
+      <path d="M97.7 164.6c-3.6 0-4.7-1.6-6.6-5.6l-18.4-37.6-37.4-12.1c-7.9-2.6-8-7.9 1.6-11.7l71.2-27.5c6.7-2.6 12.7 1.5 10.3 11l-15 67.2c-1.4 6.1-3.3 7.8-5.7 7.8z" fill="#0088cc"/>
+      <path d="M122.2 122.5l48.8-41.4c4.6-3.6 8.8-1.7 5.7 5.7l-38.1 59.7c-3.6 5.6-6.6 7.9-13.7 4.7l-18.3-13.7z" fill="#00b2ff"/>
+    </svg>
+  </a>
 
-    const letters = '01@#%QWERTYASDZXCVkırımlı';
-    const content = [
-      'Добро пожаловать! / Hoş geldiniz! / Welcome!',
-      'Я Khalid, также известен как Qirim Yurtu.',
-      'Frontend, Firebase, WordPress, Tilda.',
-      'Node.js, парсинг, автоматизация.',
-      '<a href="https://t.me/shahsiya123" class="icon"><i class="fab fa-telegram"></i></a> <a href="mailto:master_work@outlook.com" class="icon"><i class="fas fa-envelope"></i></a>'
-    ];
+  <a href="mailto:master_work@outlook.com" id="email-icon" aria-label="Email">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#222" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+    </svg>
+  </a>
+</div>
 
-    let countdown = 5;
-    let particles = [];
-    let contentElements = [];
-    let contentTriggered = false;
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
 
-    const sounds = {
-      tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
-      boom: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-small-explosion-1688.mp3'),
-      hum: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-space-ambience-1739.mp3')
-    };
+  const lines = [
+    "Добро пожаловать! / Hoş geldiniz! / Welcome!",
+    "Я Khalid, также известен как Qirim Yurtu.",
+    "Frontend-разработка, Firebase, WordPress, Tilda.",
+    "Node.js, парсинг, автоматизация."
+  ];
 
-    function doCountdown() {
-      if (countdown > 0) {
-        countdownEl.textContent = countdown;
-        sounds.tick.play();
-        countdown--;
-        setTimeout(doCountdown, 1000);
-      } else {
-        countdownEl.style.display = 'none';
-        triggerExplosion();
-      }
-    }
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
-    function triggerExplosion() {
-      sounds.boom.play();
-      sounds.hum.loop = true;
-      sounds.hum.play();
-      for (let i = 0; i < 600; i++) {
-        particles.push({
-          x: canvas.width / 2,
-          y: canvas.height / 2,
-          dx: (Math.random() - 0.5) * 10,
-          dy: (Math.random() - 0.5) * 10,
-          char: letters[Math.floor(Math.random() * letters.length)],
-          opacity: 1,
-          stage: 'scatter',
-          targetX: null,
-          targetY: null,
-          contentPiece: null
+  const particleSize = 20;
+  const particles = [];
+  let frame = 0;
+
+  const centerX = W / 2;
+  const centerY = H / 2;
+
+  const assembledPositions = [];
+  function prepareAssembledPositions() {
+    const totalHeight = lines.length * particleSize * 1.7;
+    const startY = centerY - totalHeight / 2;
+    for(let i=0; i<lines.length; i++) {
+      const line = lines[i];
+      const lineLength = line.length;
+      const startX = centerX - (lineLength * particleSize)/2;
+      for(let j=0; j<lineLength; j++) {
+        assembledPositions.push({
+          x: startX + j*particleSize,
+          y: startY + i*particleSize*1.7,
+          char: line[j]
         });
       }
-      requestAnimationFrame(animateParticles);
     }
+  }
+  prepareAssembledPositions();
 
-    function createContentElements() {
-      const spacing = 50;
-      content.forEach((text, i) => {
-        const el = document.createElement('div');
-        el.classList.add('content-piece');
-        el.innerHTML = text;
-        document.body.appendChild(el);
-
-        const left = window.innerWidth / 2 - 300;
-        const top = window.innerHeight / 2 - (content.length / 2 * spacing) + i * spacing;
-
-        el.style.left = `${left}px`;
-        el.style.top = `${top}px`;
-
-        contentElements.push({ el, left, top });
+  function createParticles() {
+    particles.length = 0;
+    for(let i=0; i<assembledPositions.length; i++) {
+      const pos = assembledPositions[i];
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 4 + Math.random()*3;
+      particles.push({
+        x: centerX,
+        y: centerY,
+        char: pos.char,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed,
+        baseVx: 0,
+        baseVy: 0,
+        targetX: pos.x,
+        targetY: pos.y,
+        phase: 'explode',
+        flyRadius: 100 + Math.random()*100,
+        flyAngle: Math.random()*Math.PI*2
       });
+    }
+  }
+  createParticles();
 
-      for (let i = 0; i < contentElements.length; i++) {
-        for (let j = 0; j < 15; j++) {
-          const index = i * 15 + j;
-          if (index >= particles.length) continue;
-          const part = particles[index];
-          part.stage = 'assemble';
-          part.targetX = contentElements[i].left + Math.random() * 300;
-          part.targetY = contentElements[i].top + Math.random() * 20;
-          part.contentPiece = contentElements[i].el;
+  // === ИКОНКИ как частицы ===
+  const icons = [...document.querySelectorAll('#icons a')];
+  // Для каждой иконки зададим стартовую позицию и скорость
+  const iconParticles = icons.map(icon => {
+    return {
+      el: icon,
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2,
+      size: 48
+    };
+  });
+
+  function lerp(a, b, t) {
+    return a + (b - a)*t;
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.font = `${particleSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+
+    frame++;
+
+    let allAssembled = true;
+
+    // Частицы текста
+    for(let p of particles) {
+      if(p.phase === 'explode') {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.95;
+        p.vy *= 0.95;
+        if(Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
+          p.phase = 'fly';
+          p.flyRadius = 150 + Math.random()*150;
+          p.flyAngle = Math.random()*Math.PI*2;
+          p.flySpeed = 0.015 + Math.random()*0.015;
+        }
+      } 
+      
+      if(p.phase === 'fly') {
+        if(frame > 300) {
+          p.flyRadius = lerp(p.flyRadius, 0, 0.02);
+          if(p.flyRadius < 1) {
+            p.x = lerp(p.x, p.targetX, 0.1);
+            p.y = lerp(p.y, p.targetY, 0.1);
+          } else {
+            p.flyAngle += p.flySpeed;
+            p.x = lerp(p.x, p.targetX + p.flyRadius * Math.cos(p.flyAngle), 0.1);
+            p.y = lerp(p.y, p.targetY + p.flyRadius * Math.sin(p.flyAngle), 0.1);
+          }
+        } else {
+          p.flyAngle += p.flySpeed;
+          p.x += Math.cos(p.flyAngle) * 1.5;
+          p.y += Math.sin(p.flyAngle) * 1.5;
+        }
+        if(Math.abs(p.x - p.targetX) > 2 || Math.abs(p.y - p.targetY) > 2 || p.flyRadius > 1) {
+          allAssembled = false;
         }
       }
+
+      ctx.shadowColor = 'rgba(0,0,0,0.15)';
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = '#222';
+      ctx.fillText(p.char, p.x, p.y);
+      ctx.shadowBlur = 0;
     }
 
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = '20px monospace';
-
-      let assembledCount = 0;
-
-      for (let p of particles) {
-        if (p.stage === 'scatter') {
-          p.x += p.dx;
-          p.y += p.dy;
-          p.opacity -= 0.008;
-          if (p.opacity <= 0.6 && !contentTriggered) {
-            contentTriggered = true;
-            createContentElements();
-          }
-        } else if (p.stage === 'assemble') {
-          p.x += (p.targetX - p.x) * 0.03;
-          p.y += (p.targetY - p.y) * 0.03;
-          if (Math.abs(p.x - p.targetX) < 2 && Math.abs(p.y - p.targetY) < 2) {
-            p.stage = 'done';
-            if (p.contentPiece) p.contentPiece.style.opacity = 1;
-            assembledCount++;
-          }
-        }
-        ctx.fillStyle = `rgba(0,0,0,${p.opacity})`;
+    if(animationPhase !== 'done') {
+      if(allAssembled && frame > 300) {
+        animationPhase = 'done';
+      } else {
+        requestAnimationFrame(animate);
+      }
+    } else {
+      ctx.clearRect(0, 0, W, H);
+      ctx.shadowColor = 'rgba(0,0,0,0.2)';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#111';
+      for(let p of particles) {
         ctx.fillText(p.char, p.x, p.y);
       }
-
-      if (assembledCount < contentElements.length * 15) {
-        requestAnimationFrame(animateParticles);
-      } else {
-        sounds.hum.pause();
-      }
+      ctx.shadowBlur = 0;
     }
 
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    });
+    // Анимация иконок — меняем их координаты и позиционируем на экране
+    for(let ip of iconParticles) {
+      ip.x += ip.vx;
+      ip.y += ip.vy;
 
-    doCountdown();
-  </script>
+      // Отскок от краёв окна
+      if(ip.x < 0) {
+        ip.x = 0;
+        ip.vx = -ip.vx;
+      }
+      if(ip.x + ip.size > W) {
+        ip.x = W - ip.size;
+        ip.vx = -ip.vx;
+      }
+      if(ip.y < 0) {
+        ip.y = 0;
+        ip.vy = -ip.vy;
+      }
+      if(ip.y + ip.size > H) {
+        ip.y = H - ip.size;
+        ip.vy = -ip.vy;
+      }
+
+      // Применяем позицию к элементу
+      ip.el.style.transform = `translate(${ip.x}px, ${ip.y}px)`;
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  let animationPhase = 'explode';
+  animate();
+</script>
+
 </body>
 </html>
