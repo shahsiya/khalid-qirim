@@ -2,16 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Khalid / Qirim Yurtu</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; background: #fff; overflow: hidden; font-family: monospace; color: black; }
-    #countdown { 
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      font-size: 6rem; z-index: 10;
+    #countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 6rem;
+      z-index: 10;
     }
-    #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    #canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
     .content-piece {
       position: absolute;
       font-size: 1.5rem;
@@ -24,39 +34,20 @@
       font-size: 2rem;
       pointer-events: auto;
     }
-    #replayButton {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      font-size: 1rem;
-      background: black;
-      color: white;
-      border: none;
-      cursor: pointer;
-      z-index: 20;
-      opacity: 0;
-      transition: opacity 0.5s;
-    }
-    #replayButton.visible {
-      opacity: 1;
-    }
   </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-yzS8A7tulq7RyzpuuO3u3j1k6v9z0i2JSjxq3HqF4m/5HJqDd0wL1kTnHXrVKPc+SkNhEMBB28U1flXGvYwtGw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
   <div id="countdown">5</div>
   <canvas id="canvas"></canvas>
-  <button id="replayButton">Смотреть снова</button>
 
   <script>
     const countdownEl = document.getElementById('countdown');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const replayBtn = document.getElementById('replayButton');
 
-    let countdown, particles, contentElements, contentTriggered;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     const letters = '01@#%QWERTYASDZXCVkırımlı';
     const content = [
@@ -67,30 +58,16 @@
       '<a href="https://t.me/shahsiya123" class="icon"><i class="fab fa-telegram"></i></a> <a href="mailto:master_work@outlook.com" class="icon"><i class="fas fa-envelope"></i></a>'
     ];
 
+    let countdown = 5;
+    let particles = [];
+    let contentElements = [];
+    let contentTriggered = false;
+
     const sounds = {
       tick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3'),
       boom: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-small-explosion-1688.mp3'),
       hum: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-space-ambience-1739.mp3')
     };
-
-    function resetScene() {
-      countdown = 5;
-      particles = [];
-      contentElements = [];
-      contentTriggered = false;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      countdownEl.textContent = countdown;
-      countdownEl.style.display = 'block';
-
-      document.querySelectorAll('.content-piece').forEach(el => el.remove());
-      replayBtn.classList.remove('visible');
-
-      sounds.hum.pause();
-      doCountdown();
-    }
 
     function doCountdown() {
       if (countdown > 0) {
@@ -99,12 +76,12 @@
         countdown--;
         setTimeout(doCountdown, 1000);
       } else {
+        countdownEl.style.display = 'none';
         triggerExplosion();
       }
     }
 
     function triggerExplosion() {
-      countdownEl.style.display = 'none';
       sounds.boom.play();
       sounds.hum.loop = true;
       sounds.hum.play();
@@ -187,17 +164,15 @@
         requestAnimationFrame(animateParticles);
       } else {
         sounds.hum.pause();
-        replayBtn.classList.add('visible');
       }
     }
 
-    replayBtn.addEventListener('click', resetScene);
     window.addEventListener('resize', () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     });
 
-    resetScene();
+    doCountdown();
   </script>
 </body>
 </html>
