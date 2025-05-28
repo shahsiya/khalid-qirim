@@ -149,11 +149,17 @@
         requestAnimationFrame(animateParticles);
       } else {
         sounds.hum.pause();
+        redirectAfterAnimation();
       }
+    }
+
+    function redirectAfterAnimation() {
+      setTimeout(() => {
+        window.location.href = "main.html"; // Укажите нужный URL страницы
+      }, 1500);
     }
 
     doCountdown();
   </script>
 </body>
 </html>
-
