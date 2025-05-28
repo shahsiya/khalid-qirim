@@ -9,9 +9,9 @@
     margin: 0; padding: 0; box-sizing: border-box;
   }
   html, body {
-    height: 100%; background: #000; overflow: hidden;
+    height: 100%; background: #fff; overflow: hidden;
     font-family: monospace;
-    color: #0f0;
+    color: #000;
     user-select: none;
   }
   canvas {
@@ -19,7 +19,7 @@
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: black;
+    background: white;
     z-index: 1;
   }
 </style>
@@ -107,7 +107,7 @@
 
   function animate() {
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#0f0';
+    ctx.fillStyle = '#000';
     ctx.font = `${particleSize}px monospace`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
@@ -160,15 +160,11 @@
       frame = 0;
     } else if(animationPhase === 'assemble' && allAssembled) {
       animationPhase = 'done';
-      // Оставляем частицы в сборе — не прячем canvas
     }
 
     if(animationPhase !== 'done') {
       requestAnimationFrame(animate);
     } else {
-      // Если хочешь, тут можно продолжать рисовать, чтобы частицы не "замерзали"
-      // или добавить какую-то лёгкую анимацию на месте.
-      // Пока просто рисуем их статично.
       for(let p of particles) {
         ctx.fillText(p.char, p.x, p.y);
       }
