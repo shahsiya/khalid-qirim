@@ -91,3 +91,12 @@ body, html {
   opacity: 1;
   transform: translateY(0);
 }
+#icons img[alt="GitHub"] {
+  filter: brightness(1.5) drop-shadow(0 0 5px white);
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+#icons img[alt="GitHub"]:hover {
+  filter: brightness(2) drop-shadow(0 0 10px white);
+  transform: scale(1.1);
+}
