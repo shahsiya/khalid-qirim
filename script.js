@@ -253,17 +253,23 @@ function revealOnScroll() {
   const windowHeight = window.innerHeight;
   const revealPoint = 150;
 
-  for (const el of reveals) {
+  reveals.forEach(el => {
     const revealTop = el.getBoundingClientRect().top;
 
+    console.log(el.id, 'top:', Math.round(revealTop), 'trigger point:', windowHeight - revealPoint);
+
     if (revealTop < windowHeight - revealPoint) {
-      el.classList.add('active');
+      if (!el.classList.contains('active')) {
+        el.classList.add('active');
+        console.log(el.id, 'activated');
+      }
     }
-  }
+  });
 }
 
-// Запускаем при прокрутке
+// Сразу вызываем функцию, чтобы активировать элементы, видимые без прокрутки
+window.addEventListener('load', revealOnScroll);
+
+// Вызываем при скролле
 window.addEventListener('scroll', revealOnScroll);
 
-// Запускаем при загрузке страницы
-window.addEventListener('load', revealOnScroll);
