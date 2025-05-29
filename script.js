@@ -29,7 +29,7 @@ function getMaxFittingParticleSize() {
   const availableWidth = W - padding;
   let size = W < 480 ? 17 : W < 768 ? 25 : 32;
 
-  ctx.font = `bold ${size}px 'Orbitron', sans-serif`;
+  ctx.font = `bold ${size}px 'Orbitron', sans-serif`; // <-- шаблонные строки с backticks
   let textWidth = ctx.measureText(longestLine).width;
 
   while (textWidth > availableWidth && size > 10) {
@@ -180,12 +180,15 @@ function animate() {
 setupCanvas();
 animate();
 
-// Плавный параллакс при скролле
+function scrollToAbout() {
+  document.getElementById("about").scrollIntoView({ behavior: "smooth" });
+}
+
 window.addEventListener('scroll', () => {
   const scrollY = window.scrollY;
   document.querySelectorAll('.parallax-layer').forEach(layer => {
-    const depth = parseFloat(layer.dataset.depth);
+    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
     const movement = scrollY * depth;
-    layer.style.transform = `translate3d(0, ${movement}px, 0)`;
+    layer.style.transform = `translateY(${movement}px)`; // <-- backticks и template string!
   });
 });
