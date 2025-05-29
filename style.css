@@ -15,12 +15,16 @@ body, html {
 
 .parallax-layer {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0; left: 0;
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
   pointer-events: none;
-  /* Можно добавить фон для слоёв, если нужно */
+  will-change: transform;
+  border-radius: 20px;
+  /* можно добавить градиенты или паттерны для глубины */
 }
+
 
 #canvas {
   position: relative;
