@@ -6,7 +6,7 @@ const ctx = canvas.getContext('2d');
 
 let W, H;
 let particleSize;
-let dpr = window.devicePixelRatio || 1;
+const dpr = window.devicePixelRatio || 1;  // Объявляем once и используем везде
 
 const lines = [
   "Добро пожаловать! ",
@@ -63,7 +63,11 @@ function setupCanvas() {
   createParticles();
 }
 
-window.addEventListener('resize', setupCanvas);
+window.addEventListener('resize', () => {
+  setupCanvas();
+  setupStarsCanvas();
+  createStars(150);
+});
 
 function prepareAssembledPositions() {
   assembledPositions.length = 0;
@@ -180,9 +184,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-setupCanvas();
-animate();
-
 // Параллакс скролл для всех элементов с классом parallax-layer
 window.addEventListener('scroll', () => {
   const scrollY = window.scrollY;
@@ -192,7 +193,9 @@ window.addEventListener('scroll', () => {
     layer.style.transform = `translateY(${movement}px)`;
   });
 });
-const dpr = window.devicePixelRatio || 1;
+
+// ——— Код для звезд ———
+
 let starsW, starsH;
 let stars = [];
 
@@ -239,11 +242,9 @@ function animateStars() {
   requestAnimationFrame(animateStars);
 }
 
-window.addEventListener('resize', () => {
-  setupStarsCanvas();
-  createStars(150);
-});
-
+// Инициализация обеих анимаций при загрузке
+setupCanvas();
 setupStarsCanvas();
 createStars(150);
+animate();
 animateStars();
