@@ -248,3 +248,17 @@ setupStarsCanvas();
 createStars(150);
 animate();
 animateStars();
+function revealOnScroll() {
+  const reveals = document.querySelectorAll('.reveal');
+  for (const el of reveals) {
+    const windowHeight = window.innerHeight;
+    const revealTop = el.getBoundingClientRect().top;
+    const revealPoint = 150;
+
+    if (revealTop < windowHeight - revealPoint) {
+      el.classList.add('active');
+    }
+  }
+}
+
+window.addEventListener('scroll', revealOnScroll);
