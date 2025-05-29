@@ -1,3 +1,6 @@
+const starsCanvas = document.getElementById('stars-canvas');
+const starsCtx = starsCanvas.getContext('2d');
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -189,3 +192,58 @@ window.addEventListener('scroll', () => {
     layer.style.transform = `translateY(${movement}px)`;
   });
 });
+const dpr = window.devicePixelRatio || 1;
+let starsW, starsH;
+let stars = [];
+
+function setupStarsCanvas() {
+  starsW = window.innerWidth;
+  starsH = window.innerHeight;
+  starsCanvas.width = starsW * dpr;
+  starsCanvas.height = starsH * dpr;
+  starsCanvas.style.width = starsW + 'px';
+  starsCanvas.style.height = starsH + 'px';
+  starsCtx.setTransform(1, 0, 0, 1, 0, 0);
+  starsCtx.scale(dpr, dpr);
+}
+
+function createStars(count = 150) {
+  stars = [];
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * starsW,
+      y: Math.random() * starsH,
+      radius: Math.random() * 1.2 + 0.3,
+      alpha: Math.random(),
+      alphaSpeed: (Math.random() * 0.02) + 0.005,
+      growing: Math.random() > 0.5
+    });
+  }
+}
+
+function animateStars() {
+  starsCtx.clearRect(0, 0, starsW, starsH);
+  for (let star of stars) {
+    if (star.growing) {
+      star.alpha += star.alphaSpeed;
+      if (star.alpha >= 1) star.growing = false;
+    } else {
+      star.alpha -= star.alphaSpeed;
+      if (star.alpha <= 0) star.growing = true;
+    }
+    starsCtx.beginPath();
+    starsCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+    starsCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha.toFixed(2)})`;
+    starsCtx.fill();
+  }
+  requestAnimationFrame(animateStars);
+}
+
+window.addEventListener('resize', () => {
+  setupStarsCanvas();
+  createStars(150);
+});
+
+setupStarsCanvas();
+createStars(150);
+animateStars();
