@@ -180,15 +180,12 @@ function animate() {
 setupCanvas();
 animate();
 
-function scrollToAbout() {
-  document.getElementById("about").scrollIntoView({ behavior: "smooth" });
-}
-
+// Плавный параллакс при скролле
 window.addEventListener('scroll', () => {
   const scrollY = window.scrollY;
   document.querySelectorAll('.parallax-layer').forEach(layer => {
-    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
+    const depth = parseFloat(layer.dataset.depth);
     const movement = scrollY * depth;
-    layer.style.transform = `translateY(${movement}px)`;
+    layer.style.transform = `translate3d(0, ${movement}px, 0)`;
   });
 });
