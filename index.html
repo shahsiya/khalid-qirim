@@ -3,38 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Анимация и параллакс</title>
+  <title>Анимация с параллаксом</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+
   <div id="animation-container">
     <canvas id="canvas"></canvas>
+
     <div id="icons">
-      <!-- Пример иконок -->
-      <img src="icon1.svg" alt="Icon 1" />
-      <img src="icon2.svg" alt="Icon 2" />
-      <img src="icon3.svg" alt="Icon 3" />
+      <img src="icon1.svg" alt="icon1" />
+      <img src="icon2.svg" alt="icon2" />
+      <img src="icon3.svg" alt="icon3" />
+      <!-- Добавь свои иконки сюда -->
     </div>
-    <!-- Добавим несколько параллакс-слоёв -->
-    <div class="parallax-layer" data-depth="0.05"></div>
+
+    <!-- Параллакс слои -->
     <div class="parallax-layer" data-depth="0.1"></div>
-    <div class="parallax-layer" data-depth="0.15"></div>
+    <div class="parallax-layer" data-depth="0.2"></div>
+    <div class="parallax-layer" data-depth="0.3"></div>
   </div>
 
   <section id="about" class="content-block">
     <h2>Обо мне</h2>
-    <p>Здесь информация о тебе...</p>
-    <div class="parallax-layer" data-depth="0.03"></div>
+    <p>Текст о фронтенд-разработке, парсинге и прочем.</p>
   </section>
 
-  <section id="services" class="content-block">
-    <h2>Услуги</h2>
-    <p>Frontend, Firebase, WordPress, Tilda, Node.js, JavaScript, парсинг, автоматизация.</p>
-    <div class="parallax-layer" data-depth="0.06"></div>
-  </section>
-
-  <script src="animation.js"></script>
-  <script src="parallax.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
