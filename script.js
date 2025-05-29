@@ -179,3 +179,16 @@ function animate() {
 
 setupCanvas();
 animate();
+
+function scrollToAbout() {
+  document.getElementById("about").scrollIntoView({ behavior: "smooth" });
+}
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  document.querySelectorAll('.parallax-layer').forEach(layer => {
+    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
+    const movement = scrollY * depth;
+    layer.style.transform = `translateY(${movement}px)`;
+  });
+});
