@@ -2,31 +2,34 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Qirim Yurtu</title>
-
-  <!-- Подключаем Orbitron -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
-
-  <!-- Подключаем внешний CSS -->
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Анимация с параллаксом</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="animation-container">
-    <!-- Параллакс-слои -->
-    <div class="parallax-layer" data-depth="0.1"></div>
-    <div class="parallax-layer" data-depth="0.3"></div>
 
+  <div id="animation-container">
     <canvas id="canvas"></canvas>
 
     <div id="icons">
-      <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
-      <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="HTML5" />
-      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
+      <img src="icon1.svg" alt="icon1" />
+      <img src="icon2.svg" alt="icon2" />
+      <img src="icon3.svg" alt="icon3" />
+      <!-- Добавь свои иконки сюда -->
     </div>
+
+    <!-- Параллакс слои -->
+    <div class="parallax-layer" data-depth="0.1"></div>
+    <div class="parallax-layer" data-depth="0.2"></div>
+    <div class="parallax-layer" data-depth="0.3"></div>
   </div>
 
-  <!-- Подключаем внешний JS -->
+  <section id="about" class="content-block">
+    <h2>Обо мне</h2>
+    <p>Текст о фронтенд-разработке, парсинге и прочем.</p>
+  </section>
+
   <script src="script.js"></script>
 </body>
 </html>
