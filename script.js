@@ -29,12 +29,12 @@ function getMaxFittingParticleSize() {
   const availableWidth = W - padding;
   let size = W < 480 ? 17 : W < 768 ? 25 : 32;
 
-  ctx.font = bold ${size}px 'Orbitron', sans-serif;
+  ctx.font = `bold ${size}px 'Orbitron', sans-serif`;
   let textWidth = ctx.measureText(longestLine).width;
 
   while (textWidth > availableWidth && size > 10) {
     size -= 1;
-    ctx.font = bold ${size}px 'Orbitron', sans-serif;
+    ctx.font = `bold ${size}px 'Orbitron', sans-serif`;
     textWidth = ctx.measureText(longestLine).width;
   }
 
@@ -118,7 +118,7 @@ function drawTextWithEffects(p, x, y) {
 
 function animate() {
   ctx.clearRect(0, 0, W, H);
-  ctx.font = bold ${particleSize}px 'Orbitron', sans-serif;
+  ctx.font = `bold ${particleSize}px 'Orbitron', sans-serif`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
 
@@ -179,14 +179,3 @@ function animate() {
 
 setupCanvas();
 animate();
-function scrollToAbout() {
-  document.getElementById("about").scrollIntoView({ behavior: "smooth" });
-}
-window.addEventListener('scroll', () => {
-  const scrollY = window.scrollY;
-  document.querySelectorAll('.parallax-layer').forEach(layer => {
-    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
-    const movement = scrollY * depth;
-    layer.style.transform = translateY(${movement}px);
-  });
-});
