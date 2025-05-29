@@ -250,10 +250,11 @@ animate();
 animateStars();
 function revealOnScroll() {
   const reveals = document.querySelectorAll('.reveal');
+  const windowHeight = window.innerHeight;
+  const revealPoint = 150;
+
   for (const el of reveals) {
-    const windowHeight = window.innerHeight;
     const revealTop = el.getBoundingClientRect().top;
-    const revealPoint = 150;
 
     if (revealTop < windowHeight - revealPoint) {
       el.classList.add('active');
@@ -261,4 +262,8 @@ function revealOnScroll() {
   }
 }
 
+// Запускаем при прокрутке
 window.addEventListener('scroll', revealOnScroll);
+
+// Запускаем при загрузке страницы
+window.addEventListener('load', revealOnScroll);
