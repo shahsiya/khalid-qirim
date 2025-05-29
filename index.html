@@ -255,23 +255,8 @@ html, body {
   ctx.fillStyle = '#000000';
   ctx.fillText(p.char, x, y);
 }
-// Переменные для параллакса
-let mouseX = centerX();
-let mouseY = centerY();
-let parallaxStrength = 0.05;
-
-// Отслеживаем движение мыши
-document.addEventListener('mousemove', (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-});
-
     function animate() {
       ctx.clearRect(0, 0, W, H);
-      // Вычисляем смещение параллакса
-const offsetX = (mouseX - centerX()) * parallaxStrength;
-const offsetY = (mouseY - centerY()) * parallaxStrength;
-
       ctx.font = `bold ${particleSize}px 'Orbitron', sans-serif`;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
@@ -315,7 +300,7 @@ const offsetY = (mouseY - centerY()) * parallaxStrength;
         }
 
         ctx.globalAlpha = p.opacity;
-        drawTextWithEffects(p, p.x + offsetX, p.y + offsetY);
+        drawTextWithEffects(p, p.x + offsetX, p.y);
 
       }
 
