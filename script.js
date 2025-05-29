@@ -179,3 +179,6 @@ function animate() {
 
 setupCanvas();
 animate();
+function scrollToAbout() {
+  document.getElementById("about").scrollIntoView({ behavior: "smooth" });
+}
