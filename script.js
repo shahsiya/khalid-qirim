@@ -155,9 +155,14 @@ function updateParticles() {
     ctx.globalAlpha = 1;
   }
 
-  if (!done) frame++;
+  if (!done) {
+  frame++;
   requestAnimationFrame(updateParticles);
+} else if (animationPhase !== 'done' && frame > 200) {
+  animationPhase = 'done';
+  showIcons();
 }
+
 
 setupCanvas();
 updateParticles();
@@ -175,3 +180,9 @@ document.getElementById('animation-container').addEventListener('mousemove', e =
     layer.style.transform = `translate3d(${movementX}px, ${movementY}px, 0)`;
   });
 });
+function showIcons() {
+  const icons = document.getElementById("icons");
+  if (icons) {
+    icons.classList.add("visible");
+  }
+}
