@@ -2,64 +2,39 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Qirim Yurtu</title>
-
-  <!-- Подключаем Orbitron -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
-
-  <!-- Подключаем внешний CSS -->
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Анимация и параллакс</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div id="animation-container">
-    <!-- Параллакс-слои -->
-    <div class="parallax-layer" data-depth="0.1"></div>
-    <div class="parallax-layer" data-depth="0.3"></div>
     <canvas id="canvas"></canvas>
- 
     <div id="icons">
-      <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
-      <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="HTML5" />
-      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
+      <!-- Пример иконок -->
+      <img src="icon1.svg" alt="Icon 1" />
+      <img src="icon2.svg" alt="Icon 2" />
+      <img src="icon3.svg" alt="Icon 3" />
     </div>
+    <!-- Добавим несколько параллакс-слоёв -->
+    <div class="parallax-layer" data-depth="0.05"></div>
+    <div class="parallax-layer" data-depth="0.1"></div>
+    <div class="parallax-layer" data-depth="0.15"></div>
   </div>
-<!-- ОБО МНЕ -->
-<section id="about" class="content-block">
-  <h2>Обо мне</h2>
-  <p>Я frontend-разработчик с опытом в создании интерактивных интерфейсов и автоматизации. Работаю с JavaScript, Firebase, Tilda, WordPress и Node.js. Занимаюсь парсингом данных, разработкой кастомных решений и веб-приложений под задачи клиентов.</p>
-</section>
 
-<!-- УСЛУГИ -->
-<section id="services" class="content-block">
-  <h2>Услуги</h2>
-  <p>Разработка сайтов под ключ, автоматизация бизнес-процессов, создание CRM-систем, интеграции с Firebase и Tilda, настройка парсеров, SEO-оптимизация и техническая поддержка.</p>
-</section>
+  <section id="about" class="content-block">
+    <h2>Обо мне</h2>
+    <p>Здесь информация о тебе...</p>
+    <div class="parallax-layer" data-depth="0.03"></div>
+  </section>
 
-<!-- ПОРТФОЛИО -->
-<section id="portfolio" class="content-block">
-  <h2>Портфолио</h2>
-  <p>В моем портфолио — проекты для логистических компаний, маркетплейсов, лендинги на Tilda с интеграцией в Google Sheets и Firebase. Внедрены системы отслеживания заказов, авторизации и оплаты.</p>
-</section>
+  <section id="services" class="content-block">
+    <h2>Услуги</h2>
+    <p>Frontend, Firebase, WordPress, Tilda, Node.js, JavaScript, парсинг, автоматизация.</p>
+    <div class="parallax-layer" data-depth="0.06"></div>
+  </section>
 
-<!-- ОТЗЫВЫ -->
-<section id="testimonials" class="content-block">
-  <h2>Отзывы</h2>
-  <p>Работаю на результат. Клиенты отмечают скорость, четкость и умение решать нестандартные задачи. Готов предоставить реальные отзывы и кейсы.</p>
-</section>
-
-<!-- ЦЕНЫ -->
-<section id="pricing" class="content-block">
-  <h2>Цены</h2>
-  <p>Базовая разработка от 150$, подключение CRM или парсера от 50$, доработка сайта — по договоренности. Индивидуальный подход к каждому проекту.</p>
-</section>
-
-<!-- КОНТАКТЫ -->
-<section id="contacts" class="content-block">
-  <h2>Контакты</h2>
-  <p>Пиши на <a href="mailto:example@email.com">example@email.com</a> или в Telegram: <a href="https://t.me/username" target="_blank">@username</a></p>
-</section>
-  <!-- Подключаем внешний JS -->
-  <script src="script.js"></script>
+  <script src="animation.js"></script>
+  <script src="parallax.js"></script>
 </body>
 </html>
