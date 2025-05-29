@@ -94,10 +94,10 @@ html, body {
 .content-block {
   padding: 60px 20px;
   max-width: 900px;
-  margin: 0 auto 100px;
+  margin: 0 auto;
   text-align: center;
-  position: relative;
   z-index: 10;
+  position: relative;
 }
 
 .content-block h2 {
