@@ -114,78 +114,64 @@ function drawTextWithEffects(p, x, y) {
   ctx.strokeText(p.char, x, y);
   ctx.fillStyle = '#000000';
   ctx.fillText(p.char, x, y);
+  ctx.shadowBlur = 0;
 }
 
-function animate() {
+function updateParticles() {
   ctx.clearRect(0, 0, W, H);
-  ctx.font = `bold ${particleSize}px 'Orbitron', sans-serif`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
+  ctx.font = `bold ${particleSize}px 'Orbitron', sans-serif`;
 
-  frame++;
-
-  let allAssembled = true;
+  let done = true;
 
   for (let p of particles) {
-    if (p.phase === 'explode') {
+    if (animationPhase === 'explode') {
       p.x += p.vx;
       p.y += p.vy;
-      p.vx *= 0.93;
-      p.vy *= 0.93;
-      p.opacity = Math.min(1, p.opacity + 0.03);
-      if (Math.abs(p.vx) < 0.5 && Math.abs(p.vy) < 0.5) {
-        p.phase = 'fly';
-      }
-    }
+      p.opacity += 0.02;
+      if (p.opacity > 1) p.opacity = 1;
 
-    if (p.phase === 'fly') {
-      if (frame > 200) {
-        p.flyRadius = lerp(p.flyRadius, 0, 0.04);
-        if (p.flyRadius < 1) {
-          p.x = lerp(p.x, p.targetX, 0.12);
-          p.y = lerp(p.y, p.targetY, 0.12);
-        } else {
-          p.flyAngle += p.flySpeed;
-          p.x = lerp(p.x, p.targetX + p.flyRadius * Math.cos(p.flyAngle), 0.08);
-          p.y = lerp(p.y, p.targetY + p.flyRadius * Math.sin(p.flyAngle), 0.08);
-        }
-      } else {
-        p.flyAngle += p.flySpeed;
-        p.x += Math.cos(p.flyAngle) * 1.2;
-        p.y += Math.sin(p.flyAngle) * 1.2;
-      }
+      p.flyAngle += p.flySpeed;
+      p.x += Math.cos(p.flyAngle) * 0.5;
+      p.y += Math.sin(p.flyAngle) * 0.5;
 
-      if (Math.abs(p.x - p.targetX) > 1.5 || Math.abs(p.y - p.targetY) > 1.5 || p.flyRadius > 1) {
-        allAssembled = false;
+      // Через 60 кадров переключаемся в собранное состояние
+      if (frame > 60) {
+        animationPhase = 'assemble';
+      }
+      done = false;
+    } else if (animationPhase === 'assemble') {
+      p.x = lerp(p.x, p.targetX, 0.1);
+      p.y = lerp(p.y, p.targetY, 0.1);
+      p.opacity = lerp(p.opacity, 1, 0.1);
+      if (Math.abs(p.x - p.targetX) > 1 || Math.abs(p.y - p.targetY) > 1) {
+        done = false;
       }
     }
 
     ctx.globalAlpha = p.opacity;
     drawTextWithEffects(p, p.x, p.y);
+    ctx.globalAlpha = 1;
   }
 
-  ctx.shadowBlur = 0;
-  ctx.globalAlpha = 1;
-
-  if (animationPhase !== 'done') {
-    if (allAssembled && frame > 200) {
-      animationPhase = 'done';
-      document.getElementById('icons').classList.add('visible');
-    }
-  }
-
-  requestAnimationFrame(animate);
+  if (!done) frame++;
+  requestAnimationFrame(updateParticles);
 }
 
 setupCanvas();
-animate();
+updateParticles();
 
-// Параллакс скролл для всех элементов с классом parallax-layer
-window.addEventListener('scroll', () => {
-  const scrollY = window.scrollY;
-  document.querySelectorAll('.parallax-layer').forEach(layer => {
-    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
-    const movement = scrollY * depth;
-    layer.style.transform = `translateY(${movement}px)`;
+// Параллакс при движении мыши
+document.getElementById('animation-container').addEventListener('mousemove', e => {
+  const layers = document.querySelectorAll('.parallax-layer');
+  const x = e.clientX / window.innerWidth - 0.5;
+  const y = e.clientY / window.innerHeight - 0.5;
+
+  layers.forEach(layer => {
+    const depth = parseFloat(layer.dataset.depth);
+    const movementX = x * depth * 30;
+    const movementY = y * depth * 30;
+    layer.style.transform = `translate3d(${movementX}px, ${movementY}px, 0)`;
   });
 });
