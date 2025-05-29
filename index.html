@@ -12,18 +12,18 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="animation-container" style="position: relative;">
-    <!-- Параллакс-слои -->
-    <div class="parallax-layer" data-depth="0.1"></div>
-    <div class="parallax-layer" data-depth="0.3"></div>
-    <canvas id="canvas"></canvas>
+  <div id="animation-container" style="position: relative; height: 100vh; overflow: hidden;">
+  <div class="parallax-layer" data-depth="0.1" style="background: rgba(255, 200, 200, 0.15);"></div>
+  <div class="parallax-layer" data-depth="0.3" style="background: rgba(200, 200, 255, 0.15);"></div>
+  <canvas id="canvas"></canvas>
 
-    <div id="icons" class="visible">
-      <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
-      <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="HTML5" />
-      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
-    </div>
+  <div id="icons" class="visible">
+    <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
+    <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="HTML5" />
+    <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" />
   </div>
+</div>
+
 
   <!-- ОБО МНЕ -->
   <section id="about" class="content-block">
