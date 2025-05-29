@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -93,25 +93,11 @@ html, body {
     gap: 12px;
   }
 }
-.parallax-layer {
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  top: -50%;
-  left: -50%;
-  background: radial-gradient(circle at center, rgba(255,215,0,0.05) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 1;
-  transition: transform 0.1s ease-out;
-}
 
   </style>
 </head>
 <body>
   <div id="animation-container">
-   <!-- Параллакс-слои -->
-<div class="parallax-layer" data-depth="0.1"></div>
-<div class="parallax-layer" data-depth="0.3"></div>
     <canvas id="canvas"></canvas>
 
     <div id="icons">
@@ -319,21 +305,5 @@ html, body {
     setupCanvas();
     animate();
   </script>
- <script>
-  // Параллакс при движении мыши
-  document.addEventListener('mousemove', e => {
-    const layers = document.querySelectorAll('.parallax-layer');
-    const x = (e.clientX / window.innerWidth - 0.5) * 2;
-    const y = (e.clientY / window.innerHeight - 0.5) * 2;
-    
-    layers.forEach(layer => {
-      const depth = parseFloat(layer.getAttribute('data-depth'));
-      const moveX = x * depth * 30;
-      const moveY = y * depth * 30;
-      layer.style.transform = `translate(${moveX}px, ${moveY}px)`;
-    });
-  });
-</script>
-
 </body>
 </html>
