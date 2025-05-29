@@ -90,13 +90,14 @@ html, body {
   z-index: 1;
   transition: transform 0.1s ease-out;
 }
+
 .content-block {
   padding: 60px 20px;
   max-width: 900px;
-  margin: 0 auto;
+  margin: 0 auto 100px;
   text-align: center;
-  z-index: 10;
   position: relative;
+  z-index: 10;
 }
 
 .content-block h2 {
