@@ -1,3 +1,15 @@
+// ---------- ПАРАЛЛАКС ПО СКРОЛЛУ ----------
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  document.querySelectorAll('.parallax-layer').forEach(layer => {
+    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
+    const movement = scrollY * depth;
+    layer.style.transform = `translateY(${movement}px)`;
+  });
+});
+
+// ---------- АНИМАЦИЯ НА CANVAS ----------
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -60,7 +72,9 @@ function setupCanvas() {
   createParticles();
 }
 
-window.addEventListener('resize', setupCanvas);
+window.addEventListener('resize', () => {
+  setupCanvas();
+});
 
 function prepareAssembledPositions() {
   assembledPositions.length = 0;
@@ -177,16 +191,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
+// Запуск:
 setupCanvas();
 animate();
-function scrollToAbout() {
-  document.getElementById("about").scrollIntoView({ behavior: "smooth" });
-}
-window.addEventListener('scroll', () => {
-  const scrollY = window.scrollY;
-  document.querySelectorAll('.parallax-layer').forEach(layer => {
-    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
-    const movement = scrollY * depth;
-    layer.style.transform = `translateY(${movement}px)`;
-  });
-});
