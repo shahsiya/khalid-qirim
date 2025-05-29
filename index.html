@@ -117,6 +117,7 @@ html, body {
 
     const lines = [
       "Добро пожаловать! ",
+      "Меня зовут Халид.",
       "Я занимаюсь",
       "Frontend-разработкой",
        "Firebase,WordPress",
@@ -147,13 +148,13 @@ html, body {
     size = 32; // для десктопа
   }
 
-  ctx.font = bold ${size}px 'Orbitron', sans-serif;
+  ctx.font = `bold ${size}px 'Orbitron', sans-serif`;
   let textWidth = ctx.measureText(longestLine).width;
 
   // Подгоняем размер под доступную ширину
   while (textWidth > availableWidth && size > 10) {
     size -= 1;
-    ctx.font = bold ${size}px 'Orbitron', sans-serif;
+    ctx.font = `bold ${size}px 'Orbitron', sans-serif`;
     textWidth = ctx.measureText(longestLine).width;
   }
 
@@ -243,7 +244,7 @@ html, body {
 
     function animate() {
       ctx.clearRect(0, 0, W, H);
-      ctx.font = bold ${particleSize}px 'Orbitron', sans-serif;
+      ctx.font = `bold ${particleSize}px 'Orbitron', sans-serif`;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
 
