@@ -180,12 +180,12 @@ function animate() {
 setupCanvas();
 animate();
 
-// Плавный параллакс при скролле
+// Параллакс скролл для всех элементов с классом parallax-layer
 window.addEventListener('scroll', () => {
   const scrollY = window.scrollY;
   document.querySelectorAll('.parallax-layer').forEach(layer => {
-    const depth = parseFloat(layer.dataset.depth);
+    const depth = parseFloat(layer.getAttribute('data-depth')) || 0;
     const movement = scrollY * depth;
-    layer.style.transform = `translate3d(0, ${movement}px, 0)`;
+    layer.style.transform = `translateY(${movement}px)`;
   });
 });
