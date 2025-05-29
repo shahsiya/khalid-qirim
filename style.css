@@ -1,71 +1,69 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Orbitron', sans-serif;
+  background-color: #fff;
+  color: #000;
+}
+
 #animation-container {
   position: relative;
-  overflow: hidden;
   height: 100vh;
-  background: linear-gradient(to bottom, #06062d, #0a0a4f);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  overflow: hidden;
+  background: #e0e0e0;
 }
 
 .parallax-layer {
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   pointer-events: none;
-  will-change: transform;
+  /* Можно добавить фон для слоёв, если нужно */
+}
+
+#canvas {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 #icons {
-  display: flex;
-  gap: 40px;
-  opacity: 0;
-  transition: opacity 1.5s ease;
   position: absolute;
-  bottom: 40px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  pointer-events: auto;
+  display: flex;
+  gap: 40px;
   z-index: 10;
-}
-
-#icons.visible {
   opacity: 1;
 }
 
 #icons img {
-  width: 50px;
-  height: 50px;
-  user-select: none;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+#icons img:hover {
+  transform: scale(1.2);
 }
 
 .content-block {
-  max-width: 720px;
-  margin: 80px auto;
-  padding: 0 20px;
-  font-family: 'Orbitron', sans-serif;
-  color: #f0f0f0;
-  text-align: center;
+  padding: 60px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #222;
 }
 
 .content-block h2 {
+  font-size: 32px;
   margin-bottom: 20px;
-  font-size: 2.2rem;
-}
-
-.content-block p {
-  font-size: 1.15rem;
-  line-height: 1.6;
-}
-
-/* Сброс и базовые стили */
-body, html {
-  margin: 0;
-  padding: 0;
-  background-color: #06062d;
-  color: #ddd;
-  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  text-align: center;
 }
